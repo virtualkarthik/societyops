@@ -1,0 +1,90 @@
+{
+  "app": { "title": "SocietyOps", "tagline": "Society Maintenance & Operations" },
+  "nav": {
+    "dashboard": "Dashboard",
+    "assets": "Assets",
+    "stp": "STP Operations",
+    "water": "Water Operations",
+    "dg": "DG Operations",
+    "ppm": "PPM / Maintenance",
+    "compliance": "Compliance Vault",
+    "inventory": "Inventory",
+    "complaints": "Complaints",
+    "reports": "Reports",
+    "logout": "Logout"
+  },
+  "auth": {
+    "login": "Login",
+    "email": "Email",
+    "password": "Password",
+    "signing_in": "Signing in…"
+  },
+  "stp": {
+    "log_title": "STP Operations Log",
+    "shift": "Shift",
+    "ph": "pH",
+    "mlss": "MLSS (mg/L)",
+    "chlorine": "Chlorine Dosing (mg/L)",
+    "blower_hours": "Blower Run Hours",
+    "inlet_flow": "Inlet Flow (m³/hr)",
+    "outlet_flow": "Outlet Flow (m³/hr)",
+    "tank_level": "Tank Level (%)",
+    "backwash": "Backwash Done",
+    "sludge": "Sludge Removed",
+    "power_hours": "Power Hours",
+    "notes": "Notes",
+    "photo": "Attach Photo",
+    "submit": "Submit Log"
+  },
+  "water": {
+    "log_title": "Water Operations Log",
+    "borewell_hours": "Borewell Run Hours",
+    "water_level": "Water Level (m)",
+    "motor_health": "Motor Health Note",
+    "sump_level": "Sump Level (%)",
+    "oht_level": "OHT Level (%)",
+    "notes": "Notes",
+    "submit": "Submit Log"
+  },
+  "dg": {
+    "log_title": "DG Operations Log",
+    "run_start": "Run Start",
+    "run_end": "Run End",
+    "diesel_opening": "Diesel Opening (L)",
+    "diesel_closing": "Diesel Closing (L)",
+    "load_kw": "Load (kW)",
+    "frequency": "Frequency (Hz)",
+    "voltage": "Voltage (V)",
+    "notes": "Notes",
+    "submit": "Submit Log"
+  },
+  "ppm": {
+    "log_title": "PPM Completion",
+    "task": "Task",
+    "checklist": "Checklist",
+    "proof_photo": "Proof Photo (Required)",
+    "gps": "Capture GPS",
+    "sign_off": "Sign-off Name",
+    "notes": "Notes",
+    "submit": "Submit Completion"
+  },
+  "sync": {
+    "pending": "Pending Sync",
+    "synced": "Synced",
+    "failed": "Sync Failed",
+    "sync_now": "Sync Now",
+    "offline": "Offline",
+    "online": "Online"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "loading": "Loading…",
+    "no_data": "No data found",
+    "asset": "Asset",
+    "date": "Date",
+    "actions": "Actions"
+  }
+}
