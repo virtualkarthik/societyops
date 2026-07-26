@@ -3,7 +3,7 @@ from pydantic import BaseModel
 
 
 class SyncItem(BaseModel):
-    entity_type: Literal["stp_log", "water_log", "dg_log", "ppm_completion"]
+    entity_type: Literal["stp_log", "water_log", "dg_log", "ppm_completion", "service_record"]
     client_uuid: str
     payload: dict[str, Any]
 

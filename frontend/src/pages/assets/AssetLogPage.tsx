@@ -4,6 +4,7 @@ import { getAsset } from "../../api/assets";
 import { STPLogPage } from "../operator/STPLogPage";
 import { WaterLogPage } from "../operator/WaterLogPage";
 import { DGLogPage } from "../operator/DGLogPage";
+import { ServiceLogPage } from "../operator/ServiceLogPage";
 
 export function AssetLogPage() {
   const { id } = useParams<{ id: string }>();
@@ -21,9 +22,9 @@ export function AssetLogPage() {
       {["STP"].includes(asset.type) && <STPLogPage />}
       {["BOREWELL", "SUMP", "OHT", "WATER_METER"].includes(asset.type) && <WaterLogPage />}
       {["DG"].includes(asset.type) && <DGLogPage />}
-      {!["STP", "BOREWELL", "SUMP", "OHT", "WATER_METER", "DG"].includes(asset.type) && (
-        <p className="text-gray-500">No quick-log form for this asset type. Use the full log pages.</p>
-      )}
+      <div className="mt-6">
+        <ServiceLogPage fixedAssetId={asset.id} />
+      </div>
     </div>
   );
 }

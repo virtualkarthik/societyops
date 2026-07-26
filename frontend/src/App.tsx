@@ -10,6 +10,7 @@ import { STPLogPage } from "./pages/operator/STPLogPage";
 import { WaterLogPage } from "./pages/operator/WaterLogPage";
 import { DGLogPage } from "./pages/operator/DGLogPage";
 import { PPMCompletionPage } from "./pages/operator/PPMCompletionPage";
+import { ServiceLogPage } from "./pages/operator/ServiceLogPage";
 import { CompliancePage } from "./pages/committee/CompliancePage";
 import { ReportsPage } from "./pages/committee/ReportsPage";
 import { InventoryPage } from "./pages/inventory/InventoryPage";
@@ -42,6 +43,7 @@ export default function App() {
       <Route path="/operator/water" element={<ProtectedRoute><WaterLogPage /></ProtectedRoute>} />
       <Route path="/operator/dg" element={<ProtectedRoute><DGLogPage /></ProtectedRoute>} />
       <Route path="/operator/ppm" element={<ProtectedRoute><PPMCompletionPage /></ProtectedRoute>} />
+      <Route path="/operator/service" element={<ProtectedRoute><ServiceLogPage /></ProtectedRoute>} />
       <Route path="/compliance" element={<ProtectedRoute><CompliancePage /></ProtectedRoute>} />
       <Route path="/reports" element={<ProtectedRoute><ReportsPage /></ProtectedRoute>} />
       <Route path="/inventory" element={<ProtectedRoute><InventoryPage /></ProtectedRoute>} />

@@ -20,5 +20,8 @@ dist/
 .DS_Store
 *.swp
 
+# Claude Code local state
+.claude/
+
 # Logs
 *.log

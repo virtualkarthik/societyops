@@ -11,6 +11,7 @@ const navItems = [
   { to: "/operator/water", key: "nav.water", roles: ["super_admin", "committee", "operator"] },
   { to: "/operator/dg", key: "nav.dg", roles: ["super_admin", "committee", "operator"] },
   { to: "/operator/ppm", key: "nav.ppm", roles: ["super_admin", "committee", "operator"] },
+  { to: "/operator/service", key: "nav.service", roles: ["super_admin", "committee", "operator"] },
   { to: "/compliance", key: "nav.compliance", roles: ["super_admin", "committee"] },
   { to: "/inventory", key: "nav.inventory", roles: ["super_admin", "committee", "operator"] },
   { to: "/complaints", key: "nav.complaints", roles: ["super_admin", "committee", "operator", "resident"] },

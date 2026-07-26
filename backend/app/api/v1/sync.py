@@ -2,7 +2,7 @@
 Offline sync batch endpoint. Accepts an array of queued operator log entries
 and upserts each by (society_id, client_uuid) — idempotent by design.
 """
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from typing import Any
 from fastapi import APIRouter
 from sqlalchemy import select
@@ -13,6 +13,7 @@ from app.models.stp import STPLog
 from app.models.water import WaterLog
 from app.models.dg import DGLog
 from app.models.ppm import PPMCompletion, PPMTask
+from app.models.service import ServiceRecord
 from app.schemas.sync import SyncItem, SyncRequest, SyncResponse, SyncResult
 from app.services.ppm import calc_next_due
 
@@ -23,6 +24,7 @@ _MODEL_MAP = {
     "water_log": WaterLog,
     "dg_log": DGLog,
     "ppm_completion": PPMCompletion,
+    "service_record": ServiceRecord,
 }
 
 _CONSTRAINT_MAP = {
@@ -30,6 +32,7 @@ _CONSTRAINT_MAP = {
     "water_log": "uq_water_log_society_uuid",
     "dg_log": "uq_dg_log_society_uuid",
     "ppm_completion": "uq_ppm_completion_society_uuid",
+    "service_record": "uq_service_record_society_uuid",
 }
 
 
@@ -58,7 +61,7 @@ async def _upsert_item(item: SyncItem, society_id: int, user_id: int, db: DB) ->
     payload["client_uuid"] = item.client_uuid
 
     # Coerce operator_id / completed_by to current user if not provided
-    if item.entity_type in ("stp_log", "water_log", "dg_log"):
+    if item.entity_type in ("stp_log", "water_log", "dg_log", "service_record"):
         payload.setdefault("operator_id", user_id)
     elif item.entity_type == "ppm_completion":
         payload.setdefault("completed_by", user_id)
@@ -67,6 +70,11 @@ async def _upsert_item(item: SyncItem, society_id: int, user_id: int, db: DB) ->
     for field in ("logged_at", "run_start", "run_end", "completed_at"):
         if field in payload and isinstance(payload[field], str):
             payload[field] = datetime.fromisoformat(payload[field])
+
+    # Parse date strings
+    for field in ("service_date", "next_service_due"):
+        if payload.get(field) and isinstance(payload[field], str):
+            payload[field] = date.fromisoformat(payload[field])
 
     # DG auto-consume
     if item.entity_type == "dg_log":

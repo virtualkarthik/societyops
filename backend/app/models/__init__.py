@@ -8,6 +8,7 @@ from app.models.ppm import PPMTask, PPMCompletion
 from app.models.complaint import Complaint
 from app.models.inventory import InventoryItem, InventoryTxn
 from app.models.compliance import ComplianceDoc
+from app.models.service import ServiceRecord
 from app.models.audit import AuditEntry
 
 __all__ = [
@@ -19,5 +20,6 @@ __all__ = [
     "Complaint",
     "InventoryItem", "InventoryTxn",
     "ComplianceDoc",
+    "ServiceRecord",
     "AuditEntry",
 ]

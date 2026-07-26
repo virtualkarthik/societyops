@@ -146,7 +146,7 @@ export type SyncStatus = "pending" | "synced" | "failed";
 
 export interface OutboxEntry {
   id?: number;
-  entity_type: "stp_log" | "water_log" | "dg_log" | "ppm_completion";
+  entity_type: "stp_log" | "water_log" | "dg_log" | "ppm_completion" | "service_record";
   client_uuid: string;
   payload: Record<string, unknown>;
   status: SyncStatus;
@@ -154,4 +154,22 @@ export interface OutboxEntry {
   synced_at: string | null;
   error: string | null;
   photo_blobs: Array<{ field: string; blob: Blob; name: string }>;
+}
+
+export type ServiceType = "ROUTINE" | "REPAIR" | "BREAKDOWN" | "AMC_VISIT" | "INSPECTION";
+
+export interface ServiceRecord {
+  id: number;
+  society_id: number;
+  asset_id: number;
+  client_uuid: string | null;
+  service_date: string;
+  service_type: ServiceType;
+  vendor_name: string | null;
+  technician_name: string | null;
+  cost: number | null;
+  next_service_due: string | null;
+  operator_id: number | null;
+  notes: string | null;
+  photo_url: string | null;
 }
