@@ -1,0 +1,3 @@
+136.115.186.144.nip.io {
+	reverse_proxy societyops-frontend:80
+}

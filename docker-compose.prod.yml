@@ -41,9 +41,23 @@ services:
     restart: unless-stopped
     depends_on:
       - societyops-backend
+
+  societyops-caddy:
+    image: caddy:2-alpine
+    container_name: societyops-caddy
+    restart: unless-stopped
     ports:
       - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - societyops-frontend
 
 volumes:
   pgdata:
   uploads:
+  caddy_data:
+  caddy_config:
