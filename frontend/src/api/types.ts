@@ -187,3 +187,56 @@ export interface ServiceRecord {
   notes: string | null;
   photo_url: string | null;
 }
+
+export type HousekeepingAreaType =
+  | "CORRIDOR" | "STAIRCASE" | "LOBBY" | "PARKING" | "COMMON_ROOM"
+  | "CLUBHOUSE" | "GARDEN" | "TERRACE" | "OTHER";
+
+export type HousekeepingActivityType =
+  | "DRY_SWEEPING" | "WET_MOPPING" | "PARKING_CLEANING" | "ROOM_CLEANING"
+  | "GARBAGE_COLLECTION" | "GLASS_CLEANING" | "OTHER";
+
+export interface HousekeepingArea {
+  id: number;
+  society_id: number;
+  name: string;
+  area_type: HousekeepingAreaType;
+  location: string | null;
+  expected_activities: HousekeepingActivityType[] | null;
+  is_active: boolean;
+}
+
+export interface HousekeepingLog {
+  id: number;
+  society_id: number;
+  area_id: number;
+  activity_type: HousekeepingActivityType;
+  client_uuid: string | null;
+  logged_at: string;
+  completed_by: number | null;
+  notes: string | null;
+  photo_url: string | null;
+}
+
+export interface TodayActivityStatus {
+  activity_type: HousekeepingActivityType;
+  done: boolean;
+  logged_at: string | null;
+  completed_by_name: string | null;
+  log_id: number | null;
+}
+
+export interface TodayAreaStatus {
+  area_id: number;
+  area_name: string;
+  area_type: HousekeepingAreaType;
+  activities: TodayActivityStatus[];
+  all_done: boolean;
+}
+
+export interface HousekeepingToday {
+  date: string;
+  areas: TodayAreaStatus[];
+  total_expected: number;
+  total_done: number;
+}

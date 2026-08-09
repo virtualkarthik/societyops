@@ -16,6 +16,7 @@ import { CompliancePage } from "./pages/committee/CompliancePage";
 import { ReportsPage } from "./pages/committee/ReportsPage";
 import { InventoryPage } from "./pages/inventory/InventoryPage";
 import { ComplaintsPage } from "./pages/complaints/ComplaintsPage";
+import { HousekeepingPage } from "./pages/housekeeping/HousekeepingPage";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -50,6 +51,7 @@ export default function App() {
       <Route path="/reports" element={<ProtectedRoute><ReportsPage /></ProtectedRoute>} />
       <Route path="/inventory" element={<ProtectedRoute><InventoryPage /></ProtectedRoute>} />
       <Route path="/complaints" element={<ProtectedRoute><ComplaintsPage /></ProtectedRoute>} />
+      <Route path="/housekeeping" element={<ProtectedRoute><HousekeepingPage /></ProtectedRoute>} />
       <Route path="/" element={<DefaultRedirect />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
