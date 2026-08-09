@@ -7,6 +7,7 @@ Create Date: 2026-08-09 00:00:00
 from typing import Sequence, Union
 from alembic import op
 import sqlalchemy as sa
+from sqlalchemy.dialects import postgresql
 
 revision: str = "006"
 down_revision: Union[str, None] = "005"
@@ -61,7 +62,7 @@ def upgrade() -> None:
         sa.Column("id", sa.Integer, primary_key=True),
         sa.Column("society_id", sa.Integer, sa.ForeignKey("society.id"), nullable=False),
         sa.Column("area_id", sa.Integer, sa.ForeignKey("housekeeping_area.id"), nullable=False),
-        sa.Column("activity_type", sa.Enum(
+        sa.Column("activity_type", postgresql.ENUM(
             "DRY_SWEEPING", "WET_MOPPING", "PARKING_CLEANING", "ROOM_CLEANING",
             "GARBAGE_COLLECTION", "GLASS_CLEANING", "OTHER",
             name="housekeepingactivitytype", create_type=False), nullable=False),
