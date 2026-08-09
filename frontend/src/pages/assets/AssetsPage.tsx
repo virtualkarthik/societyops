@@ -122,6 +122,31 @@ export function AssetsPage() {
         </button>
       </div>
 
+      {anomalies.length > 0 && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-red-500">⚠</span>
+            <h2 className="font-semibold text-red-700 text-sm">
+              {anomalies.length} Asset{anomalies.length > 1 ? "s" : ""} With Abnormal Activity
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+            {anomalies.map((a) => (
+              <Link
+                key={a.asset_id}
+                to={`/assets/${a.asset_id}`}
+                className="flex justify-between items-center bg-white border border-red-100 rounded-lg px-3 py-2 text-sm hover:border-red-300 transition-colors"
+              >
+                <span className="text-gray-800 truncate mr-2">{a.asset_name}</span>
+                <span className="text-red-600 text-xs font-medium whitespace-nowrap">
+                  {a.event_count} in {a.window_days}d
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
       {showForm && (
         <div className="bg-white rounded-2xl shadow p-5 mb-6 space-y-4">
           <h2 className="font-semibold text-gray-700">New Asset</h2>
