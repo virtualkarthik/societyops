@@ -1,6 +1,7 @@
 import api from "../api/client";
 import { db } from "./db";
 import type { OutboxEntry } from "../api/types";
+import { generateUUID } from "../lib/uuid";
 
 interface SyncResult {
   client_uuid: string;
@@ -73,7 +74,7 @@ export async function queueEntry(
   payload: Record<string, unknown>,
   photo_blobs: OutboxEntry["photo_blobs"] = []
 ): Promise<string> {
-  const client_uuid = crypto.randomUUID();
+  const client_uuid = generateUUID();
   await db.outbox.add({
     entity_type,
     client_uuid,

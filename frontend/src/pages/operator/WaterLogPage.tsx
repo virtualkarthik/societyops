@@ -8,6 +8,7 @@ import api from "../../api/client";
 import { useOnlineStatus } from "../../hooks/useOnlineStatus";
 import { queueEntry, syncOutbox } from "../../offline/sync";
 import { db } from "../../offline/db";
+import { generateUUID } from "../../lib/uuid";
 import { SyncStatusBadge } from "../../components/SyncStatusBadge";
 import { TrendChart } from "../../components/TrendChart";
 
@@ -53,7 +54,7 @@ function LogEntryModal({ assets, onClose, onSuccess }: {
     };
     try {
       if (online) {
-        payload.client_uuid = crypto.randomUUID();
+        payload.client_uuid = generateUUID();
         await api.post("/water/logs", payload);
         toast.success("Water log submitted");
         await syncOutbox();

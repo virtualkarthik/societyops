@@ -8,6 +8,7 @@ import { useOnlineStatus } from "../../hooks/useOnlineStatus";
 import { queueEntry, syncOutbox } from "../../offline/sync";
 import { db } from "../../offline/db";
 import { SyncStatusBadge } from "../../components/SyncStatusBadge";
+import { generateUUID } from "../../lib/uuid";
 
 const SERVICE_TYPES: ServiceType[] = ["ROUTINE", "REPAIR", "BREAKDOWN", "AMC_VISIT", "INSPECTION"];
 
@@ -64,7 +65,7 @@ function LogServiceModal({ assets, fixedAssetId, onClose, onSuccess }: {
     };
     try {
       if (online) {
-        payload.client_uuid = crypto.randomUUID();
+        payload.client_uuid = generateUUID();
         await api.post("/service-records", payload);
         toast.success("Service record saved");
         await syncOutbox();
