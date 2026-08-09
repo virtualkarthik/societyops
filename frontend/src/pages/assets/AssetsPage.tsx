@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
@@ -7,6 +7,7 @@ import api from "../../api/client";
 import type { AssetType } from "../../api/types";
 
 const ASSET_TYPES: AssetType[] = ["STP","BOREWELL","SUMP","OHT","DG","LIFT","FIRE","PUMP","TRANSFORMER","SOLAR","WATER_METER","OTHER"];
+type StatusFilter = "all" | "active" | "inactive";
 
 function QRModal({ assetId, assetName, onClose }: { assetId: number; assetName: string; onClose: () => void }) {
   const [qrUrl, setQrUrl] = useState<string | null>(null);
@@ -61,6 +62,24 @@ export function AssetsPage() {
     purchased_from: "",
   });
   const [qrModal, setQrModal] = useState<{ id: number; name: string } | null>(null);
+  const [search, setSearch] = useState("");
+  const [typeFilter, setTypeFilter] = useState<AssetType | "all">("all");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+
+  const filteredAssets = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return assets.filter((a) => {
+      if (typeFilter !== "all" && a.type !== typeFilter) return false;
+      if (statusFilter === "active" && !a.is_active) return false;
+      if (statusFilter === "inactive" && a.is_active) return false;
+      if (q) {
+        const haystack = [a.name, a.location, a.make, a.model, a.serial_number]
+          .filter(Boolean).join(" ").toLowerCase();
+        if (!haystack.includes(q)) return false;
+      }
+      return true;
+    });
+  }, [assets, search, typeFilter, statusFilter]);
 
   const createMutation = useMutation({
     mutationFn: () =>
@@ -142,10 +161,43 @@ export function AssetsPage() {
         </div>
       )}
 
+      <div className="bg-white rounded-xl shadow-sm p-4 mb-6 flex flex-col sm:flex-row gap-3">
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search by name, location, make, model, serial…"
+          className="flex-1 border rounded-lg px-3 py-2 text-sm min-h-[40px]"
+        />
+        <select
+          value={typeFilter}
+          onChange={(e) => setTypeFilter(e.target.value as AssetType | "all")}
+          className="border rounded-lg px-3 py-2 text-sm min-h-[40px] sm:w-44"
+        >
+          <option value="all">All Types</option>
+          {ASSET_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+        </select>
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
+          className="border rounded-lg px-3 py-2 text-sm min-h-[40px] sm:w-36"
+        >
+          <option value="all">All Statuses</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </div>
+
       {isLoading && <div className="text-center text-gray-400 py-10">Loading…</div>}
 
+      {!isLoading && filteredAssets.length === 0 && (
+        <div className="text-center text-gray-400 py-10 text-sm">
+          {assets.length === 0 ? 'No assets yet — tap "+ Add Asset" to create one.' : "No assets match your search/filters."}
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {assets.map((asset) => (
+        {filteredAssets.map((asset) => (
           <Link
             key={asset.id}
             to={`/assets/${asset.id}`}

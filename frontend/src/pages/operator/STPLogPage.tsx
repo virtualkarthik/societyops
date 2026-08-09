@@ -9,6 +9,7 @@ import { useOnlineStatus } from "../../hooks/useOnlineStatus";
 import { queueEntry, syncOutbox } from "../../offline/sync";
 import { db } from "../../offline/db";
 import { generateUUID } from "../../lib/uuid";
+import { recentDateLabels } from "../../lib/trend";
 import { SyncStatusBadge } from "../../components/SyncStatusBadge";
 import { TrendChart } from "../../components/TrendChart";
 
@@ -183,12 +184,7 @@ export function STPLogPage() {
   const breaches = recent.filter((l) => l.ph !== null && (l.ph < 6.5 || l.ph > 9.0));
 
   const trendData = useMemo(() => {
-    const today = new Date();
-    const days = Array.from({ length: 5 }, (_, i) => {
-      const d = new Date(today);
-      d.setDate(d.getDate() - (4 - i));
-      return d.toLocaleDateString("en-IN", { month: "short", day: "numeric" });
-    });
+    const days = recentDateLabels(logs.map((l) => l.logged_at), 5);
     const grouped: Record<string, STPLog[]> = {};
     logs.forEach((log) => {
       const label = new Date(log.logged_at).toLocaleDateString("en-IN", { month: "short", day: "numeric" });

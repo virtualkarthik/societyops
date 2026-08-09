@@ -9,6 +9,7 @@ import { useOnlineStatus } from "../../hooks/useOnlineStatus";
 import { queueEntry, syncOutbox } from "../../offline/sync";
 import { db } from "../../offline/db";
 import { generateUUID } from "../../lib/uuid";
+import { recentDateLabels } from "../../lib/trend";
 import { SyncStatusBadge } from "../../components/SyncStatusBadge";
 import { TrendChart } from "../../components/TrendChart";
 
@@ -170,12 +171,7 @@ export function DGLogPage() {
   const totalConsumed = recent.reduce((sum, l) => sum + (l.diesel_consumed ?? 0), 0);
 
   const trendData = useMemo(() => {
-    const today = new Date();
-    const days = Array.from({ length: 5 }, (_, i) => {
-      const d = new Date(today);
-      d.setDate(d.getDate() - (4 - i));
-      return d.toLocaleDateString("en-IN", { month: "short", day: "numeric" });
-    });
+    const days = recentDateLabels(logs.map((l) => l.run_start), 5);
     const grouped: Record<string, DGLog[]> = {};
     logs.forEach((log) => {
       const label = new Date(log.run_start).toLocaleDateString("en-IN", { month: "short", day: "numeric" });
