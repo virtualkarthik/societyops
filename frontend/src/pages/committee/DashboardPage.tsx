@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
 import { getDashboard } from "../../api/dashboard";
 import { useTranslation } from "react-i18next";
 
@@ -100,6 +101,20 @@ export function DashboardPage() {
         <StatCard title="Pending Complaints" accent={data.pending_complaints > 5}>
           <div className="text-4xl font-bold text-gray-700 mb-1">{data.pending_complaints}</div>
           <p className="text-xs text-gray-400">Open or in-progress</p>
+        </StatCard>
+
+        {/* Asset Anomalies */}
+        <StatCard title="Asset Anomalies" accent={data.asset_anomalies.count > 0}>
+          <div className="text-4xl font-bold text-red-600 mb-2">{data.asset_anomalies.count}</div>
+          <div className="space-y-1 max-h-40 overflow-y-auto">
+            {data.asset_anomalies.items.map((a) => (
+              <Link key={a.asset_id} to={`/assets/${a.asset_id}`} className="text-sm text-gray-700 flex justify-between hover:text-brand">
+                <span className="truncate mr-2">{a.asset_name}</span>
+                <span className="text-red-500 text-xs whitespace-nowrap">{a.event_count} in {a.window_days}d</span>
+              </Link>
+            ))}
+            {data.asset_anomalies.count === 0 && <p className="text-sm text-green-600">No abnormal repair patterns ✓</p>}
+          </div>
         </StatCard>
       </div>
     </div>

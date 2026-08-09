@@ -19,6 +19,7 @@ class AssetType(str, enum.Enum):
     TRANSFORMER = "TRANSFORMER"
     SOLAR = "SOLAR"
     WATER_METER = "WATER_METER"
+    LAMP_POST = "LAMP_POST"
     OTHER = "OTHER"
 
 

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import { getAsset, updateAsset } from "../../api/assets";
+import { getAsset, updateAsset, getAssetAnomalies } from "../../api/assets";
 import type { Asset } from "../../api/types";
 import { ServiceLogPage } from "../operator/ServiceLogPage";
 
@@ -167,6 +167,8 @@ export function AssetDetailPage() {
     queryFn: () => getAsset(Number(id)),
     enabled: !!id,
   });
+  const { data: anomalies = [] } = useQuery({ queryKey: ["asset-anomalies"], queryFn: getAssetAnomalies });
+  const anomaly = anomalies.find((a) => a.asset_id === Number(id));
 
   if (isLoading) return <div className="text-center text-gray-400 py-10">Loading asset…</div>;
   if (!asset) return <div className="text-center text-gray-400 py-10">Asset not found.</div>;
@@ -174,6 +176,20 @@ export function AssetDetailPage() {
   return (
     <div className="max-w-3xl mx-auto">
       <Link to="/assets" className="text-sm text-brand hover:underline">← Back to Assets</Link>
+
+      {anomaly && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 mt-3 flex gap-3 items-start">
+          <span className="text-red-500 text-lg">⚠</span>
+          <div>
+            <p className="font-semibold text-red-700 text-sm">Abnormal activity detected</p>
+            <p className="text-xs text-red-600 mt-0.5">
+              {anomaly.event_count} repair/breakdown service records in the last {anomaly.window_days} days
+              {anomaly.last_event_date ? ` — most recent on ${anomaly.last_event_date}` : ""}. This asset may need
+              root-cause investigation rather than repeat fixes.
+            </p>
+          </div>
+        </div>
+      )}
 
       <div className="flex justify-between items-start mt-3 mb-6">
         <div>

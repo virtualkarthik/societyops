@@ -12,7 +12,7 @@ export interface User {
 
 export type AssetType =
   | "STP" | "BOREWELL" | "SUMP" | "OHT" | "DG" | "LIFT"
-  | "FIRE" | "PUMP" | "TRANSFORMER" | "SOLAR" | "WATER_METER" | "OTHER";
+  | "FIRE" | "PUMP" | "TRANSFORMER" | "SOLAR" | "WATER_METER" | "LAMP_POST" | "OTHER";
 
 export interface Asset {
   id: number;
@@ -137,6 +137,15 @@ export interface ComplianceDoc {
   notes: string | null;
 }
 
+export interface AssetAnomaly {
+  asset_id: number;
+  asset_name: string;
+  asset_type: AssetType | null;
+  event_count: number;
+  window_days: number;
+  last_event_date: string | null;
+}
+
 export interface DashboardData {
   overdue_ppm: { count: number; tasks: Array<{ id: number; title: string; next_due: string | null; days_overdue: number | null; asset_id: number | null }> };
   stp_breaches: { count: number; tests: Array<{ id: number; test_date: string | null; breach_details: string | null; asset_id: number }> };
@@ -144,6 +153,7 @@ export interface DashboardData {
   dg_fuel: { estimated_stock_litres: number; total_purchased: number; total_consumed: number };
   pending_complaints: number;
   water_this_month: { borewell_run_hours: number; tanker_litres: number };
+  asset_anomalies: { count: number; items: AssetAnomaly[] };
 }
 
 export type SyncStatus = "pending" | "synced" | "failed";

@@ -9,6 +9,7 @@ from app.core.deps import CurrentUser, DB
 from app.models.asset import Asset
 from app.schemas.asset import AssetCreate, AssetUpdate, AssetOut
 from app.services.audit import log_audit
+from app.services.anomaly import get_asset_anomalies
 
 router = APIRouter(prefix="/assets", tags=["assets"])
 
@@ -33,6 +34,11 @@ async def create_asset(body: AssetCreate, current_user: CurrentUser, db: DB):
     await db.commit()
     await db.refresh(asset)
     return asset
+
+
+@router.get("/anomalies")
+async def list_asset_anomalies(current_user: CurrentUser, db: DB):
+    return await get_asset_anomalies(db, current_user.society_id)
 
 
 @router.get("/{asset_id}", response_model=AssetOut)

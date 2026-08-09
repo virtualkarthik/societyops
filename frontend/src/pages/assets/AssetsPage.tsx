@@ -2,11 +2,11 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import { getAssets, createAsset } from "../../api/assets";
+import { getAssets, createAsset, getAssetAnomalies } from "../../api/assets";
 import api from "../../api/client";
 import type { AssetType } from "../../api/types";
 
-const ASSET_TYPES: AssetType[] = ["STP","BOREWELL","SUMP","OHT","DG","LIFT","FIRE","PUMP","TRANSFORMER","SOLAR","WATER_METER","OTHER"];
+const ASSET_TYPES: AssetType[] = ["STP","BOREWELL","SUMP","OHT","DG","LIFT","FIRE","PUMP","TRANSFORMER","SOLAR","WATER_METER","LAMP_POST","OTHER"];
 type StatusFilter = "all" | "active" | "inactive";
 
 function QRModal({ assetId, assetName, onClose }: { assetId: number; assetName: string; onClose: () => void }) {
@@ -49,6 +49,8 @@ function QRModal({ assetId, assetName, onClose }: { assetId: number; assetName: 
 export function AssetsPage() {
   const qc = useQueryClient();
   const { data: assets = [], isLoading } = useQuery({ queryKey: ["assets"], queryFn: getAssets });
+  const { data: anomalies = [] } = useQuery({ queryKey: ["asset-anomalies"], queryFn: getAssetAnomalies });
+  const anomalyByAsset = useMemo(() => new Map(anomalies.map((a) => [a.asset_id, a])), [anomalies]);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({
     type: "STP" as AssetType,
@@ -197,41 +199,49 @@ export function AssetsPage() {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {filteredAssets.map((asset) => (
-          <Link
-            key={asset.id}
-            to={`/assets/${asset.id}`}
-            className="block bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition-shadow cursor-pointer"
-          >
-            <div className="flex justify-between items-start mb-2">
-              <div>
-                <span className="text-xs font-semibold text-brand bg-brand-light px-2 py-0.5 rounded-full">
-                  {asset.type}
-                </span>
-                {!asset.is_active && (
-                  <span className="ml-1 text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">Inactive</span>
-                )}
+        {filteredAssets.map((asset) => {
+          const anomaly = anomalyByAsset.get(asset.id);
+          return (
+            <Link
+              key={asset.id}
+              to={`/assets/${asset.id}`}
+              className={`block bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition-shadow cursor-pointer ${anomaly ? "ring-1 ring-red-300" : ""}`}
+            >
+              <div className="flex justify-between items-start mb-2">
+                <div>
+                  <span className="text-xs font-semibold text-brand bg-brand-light px-2 py-0.5 rounded-full">
+                    {asset.type}
+                  </span>
+                  {!asset.is_active && (
+                    <span className="ml-1 text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">Inactive</span>
+                  )}
+                </div>
+                <button
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); setQrModal({ id: asset.id, name: asset.name }); }}
+                  className="text-xs text-brand underline hover:text-brand-dark"
+                >
+                  QR
+                </button>
               </div>
-              <button
-                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setQrModal({ id: asset.id, name: asset.name }); }}
-                className="text-xs text-brand underline hover:text-brand-dark"
-              >
-                QR
-              </button>
-            </div>
-            <h3 className="font-semibold text-gray-800 mt-1">{asset.name}</h3>
-            {asset.location && <p className="text-xs text-gray-500 mt-0.5">📍 {asset.location}</p>}
-            {asset.make && <p className="text-xs text-gray-400">{asset.make} {asset.model}</p>}
-            {asset.serial_number && <p className="text-xs text-gray-400">S/N: {asset.serial_number}</p>}
-            {asset.amc_expiry && (
-              <p className="text-xs mt-1">
-                AMC expires: <span className={new Date(asset.amc_expiry) < new Date() ? "text-red-600" : "text-gray-600"}>
-                  {asset.amc_expiry}
-                </span>
-              </p>
-            )}
-          </Link>
-        ))}
+              <h3 className="font-semibold text-gray-800 mt-1">{asset.name}</h3>
+              {asset.location && <p className="text-xs text-gray-500 mt-0.5">📍 {asset.location}</p>}
+              {asset.make && <p className="text-xs text-gray-400">{asset.make} {asset.model}</p>}
+              {asset.serial_number && <p className="text-xs text-gray-400">S/N: {asset.serial_number}</p>}
+              {asset.amc_expiry && (
+                <p className="text-xs mt-1">
+                  AMC expires: <span className={new Date(asset.amc_expiry) < new Date() ? "text-red-600" : "text-gray-600"}>
+                    {asset.amc_expiry}
+                  </span>
+                </p>
+              )}
+              {anomaly && (
+                <p className="text-xs font-medium text-red-600 bg-red-50 mt-2 px-2 py-1 rounded-lg">
+                  ⚠ {anomaly.event_count} repairs/breakdowns in {anomaly.window_days}d — anomaly
+                </p>
+              )}
+            </Link>
+          );
+        })}
       </div>
     </div>
   );

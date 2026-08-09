@@ -10,6 +10,7 @@ from app.models.compliance import ComplianceDoc
 from app.models.dg import DGLog, FuelPurchase
 from app.models.complaint import Complaint, ComplaintStatus
 from app.models.water import WaterLog, TankerDelivery
+from app.services.anomaly import get_asset_anomalies
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
@@ -74,6 +75,8 @@ async def get_dashboard(current_user: CurrentUser, db: DB):
         .where(TankerDelivery.society_id == sid, TankerDelivery.logged_at >= month_start)
     )).scalar() or 0
 
+    asset_anomalies = await get_asset_anomalies(db, sid)
+
     return {
         "overdue_ppm": {
             "count": len(overdue_tasks),
@@ -122,5 +125,9 @@ async def get_dashboard(current_user: CurrentUser, db: DB):
         "water_this_month": {
             "borewell_run_hours": round(borewell_hours, 2),
             "tanker_litres": round(tanker_litres, 2),
+        },
+        "asset_anomalies": {
+            "count": len(asset_anomalies),
+            "items": asset_anomalies,
         },
     }
