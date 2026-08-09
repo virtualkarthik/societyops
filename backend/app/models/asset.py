@@ -32,10 +32,14 @@ class Asset(Base):
     name: Mapped[str] = mapped_column(String(200), nullable=False)
     make: Mapped[Optional[str]] = mapped_column(String(100))
     model: Mapped[Optional[str]] = mapped_column(String(100))
+    serial_number: Mapped[Optional[str]] = mapped_column(String(100))
     capacity_value: Mapped[Optional[float]]
     capacity_unit: Mapped[Optional[str]] = mapped_column(String(50))
     install_date: Mapped[Optional[date]] = mapped_column(Date)
     warranty_expiry: Mapped[Optional[date]] = mapped_column(Date)
+    purchase_date: Mapped[Optional[date]] = mapped_column(Date)
+    purchase_cost: Mapped[Optional[float]]
+    purchased_from: Mapped[Optional[str]] = mapped_column(String(200))
     amc_vendor: Mapped[Optional[str]] = mapped_column(String(200))
     amc_expiry: Mapped[Optional[date]] = mapped_column(Date)
     rated_params_json: Mapped[Optional[dict]] = mapped_column(JSON)

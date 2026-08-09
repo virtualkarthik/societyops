@@ -9,10 +9,14 @@ class AssetCreate(BaseModel):
     name: str
     make: Optional[str] = None
     model: Optional[str] = None
+    serial_number: Optional[str] = None
     capacity_value: Optional[float] = None
     capacity_unit: Optional[str] = None
     install_date: Optional[date] = None
     warranty_expiry: Optional[date] = None
+    purchase_date: Optional[date] = None
+    purchase_cost: Optional[float] = None
+    purchased_from: Optional[str] = None
     amc_vendor: Optional[str] = None
     amc_expiry: Optional[date] = None
     rated_params_json: Optional[dict[str, Any]] = None

@@ -21,10 +21,14 @@ export interface Asset {
   name: string;
   make: string | null;
   model: string | null;
+  serial_number: string | null;
   capacity_value: number | null;
   capacity_unit: string | null;
   install_date: string | null;
   warranty_expiry: string | null;
+  purchase_date: string | null;
+  purchase_cost: number | null;
+  purchased_from: string | null;
   amc_vendor: string | null;
   amc_expiry: string | null;
   qr_token: string;

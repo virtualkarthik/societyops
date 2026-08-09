@@ -4,6 +4,7 @@ import { Layout } from "./components/Layout";
 import { LoginPage } from "./pages/auth/LoginPage";
 import { DashboardPage } from "./pages/committee/DashboardPage";
 import { AssetsPage } from "./pages/assets/AssetsPage";
+import { AssetDetailPage } from "./pages/assets/AssetDetailPage";
 import { AssetLogPage } from "./pages/assets/AssetLogPage";
 import { QRScanPage } from "./pages/assets/QRScanPage";
 import { STPLogPage } from "./pages/operator/STPLogPage";
@@ -38,6 +39,7 @@ export default function App() {
 
       <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
       <Route path="/assets" element={<ProtectedRoute><AssetsPage /></ProtectedRoute>} />
+      <Route path="/assets/:id" element={<ProtectedRoute><AssetDetailPage /></ProtectedRoute>} />
       <Route path="/assets/:id/log" element={<ProtectedRoute><AssetLogPage /></ProtectedRoute>} />
       <Route path="/operator/stp" element={<ProtectedRoute><STPLogPage /></ProtectedRoute>} />
       <Route path="/operator/water" element={<ProtectedRoute><WaterLogPage /></ProtectedRoute>} />

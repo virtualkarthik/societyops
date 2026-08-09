@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { getAssets, createAsset } from "../../api/assets";
@@ -48,16 +49,40 @@ export function AssetsPage() {
   const qc = useQueryClient();
   const { data: assets = [], isLoading } = useQuery({ queryKey: ["assets"], queryFn: getAssets });
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ type: "STP" as AssetType, name: "", location: "", make: "", model: "" });
+  const [form, setForm] = useState({
+    type: "STP" as AssetType,
+    name: "",
+    location: "",
+    make: "",
+    model: "",
+    serial_number: "",
+    purchase_date: "",
+    purchase_cost: "",
+    purchased_from: "",
+  });
   const [qrModal, setQrModal] = useState<{ id: number; name: string } | null>(null);
 
   const createMutation = useMutation({
-    mutationFn: () => createAsset(form),
+    mutationFn: () =>
+      createAsset({
+        type: form.type,
+        name: form.name,
+        location: form.location || null,
+        make: form.make || null,
+        model: form.model || null,
+        serial_number: form.serial_number || null,
+        purchase_date: form.purchase_date || null,
+        purchase_cost: form.purchase_cost ? Number(form.purchase_cost) : null,
+        purchased_from: form.purchased_from || null,
+      }),
     onSuccess: () => {
       toast.success("Asset created");
       qc.invalidateQueries({ queryKey: ["assets"] });
       setShowForm(false);
-      setForm({ type: "STP", name: "", location: "", make: "", model: "" });
+      setForm({
+        type: "STP", name: "", location: "", make: "", model: "",
+        serial_number: "", purchase_date: "", purchase_cost: "", purchased_from: "",
+      });
     },
     onError: () => toast.error("Failed to create asset"),
   });
@@ -86,14 +111,26 @@ export function AssetsPage() {
               {ASSET_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
             </select>
           </div>
-          {(["name", "location", "make", "model"] as const).map((field) => (
+          {(["name", "location", "make", "model", "serial_number", "purchased_from"] as const).map((field) => (
             <div key={field}>
-              <label className="block text-sm font-medium text-gray-700 mb-1 capitalize">{field}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1 capitalize">{field.replace("_", " ")}</label>
               <input type="text" value={form[field]} onChange={(e) => setForm((f) => ({ ...f, [field]: e.target.value }))}
                 className="w-full border rounded-lg px-3 py-2 text-sm"
                 required={field === "name"} />
             </div>
           ))}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Purchase Date</label>
+              <input type="date" value={form.purchase_date} onChange={(e) => setForm((f) => ({ ...f, purchase_date: e.target.value }))}
+                className="w-full border rounded-lg px-3 py-2 text-sm" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Purchase Cost (₹)</label>
+              <input type="number" value={form.purchase_cost} onChange={(e) => setForm((f) => ({ ...f, purchase_cost: e.target.value }))}
+                className="w-full border rounded-lg px-3 py-2 text-sm" />
+            </div>
+          </div>
           <div className="flex gap-3">
             <button onClick={() => createMutation.mutate()}
               disabled={createMutation.isPending || !form.name}
@@ -109,7 +146,11 @@ export function AssetsPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {assets.map((asset) => (
-          <div key={asset.id} className="bg-white rounded-xl shadow-sm p-4">
+          <Link
+            key={asset.id}
+            to={`/assets/${asset.id}`}
+            className="block bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition-shadow cursor-pointer"
+          >
             <div className="flex justify-between items-start mb-2">
               <div>
                 <span className="text-xs font-semibold text-brand bg-brand-light px-2 py-0.5 rounded-full">
@@ -120,7 +161,7 @@ export function AssetsPage() {
                 )}
               </div>
               <button
-                onClick={() => setQrModal({ id: asset.id, name: asset.name })}
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setQrModal({ id: asset.id, name: asset.name }); }}
                 className="text-xs text-brand underline hover:text-brand-dark"
               >
                 QR
@@ -129,6 +170,7 @@ export function AssetsPage() {
             <h3 className="font-semibold text-gray-800 mt-1">{asset.name}</h3>
             {asset.location && <p className="text-xs text-gray-500 mt-0.5">📍 {asset.location}</p>}
             {asset.make && <p className="text-xs text-gray-400">{asset.make} {asset.model}</p>}
+            {asset.serial_number && <p className="text-xs text-gray-400">S/N: {asset.serial_number}</p>}
             {asset.amc_expiry && (
               <p className="text-xs mt-1">
                 AMC expires: <span className={new Date(asset.amc_expiry) < new Date() ? "text-red-600" : "text-gray-600"}>
@@ -136,7 +178,7 @@ export function AssetsPage() {
                 </span>
               </p>
             )}
-          </div>
+          </Link>
         ))}
       </div>
     </div>
