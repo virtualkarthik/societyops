@@ -1,5 +1,5 @@
 import api from "./client";
-import type { HousekeepingArea, HousekeepingLog, HousekeepingToday } from "./types";
+import type { HousekeepingArea, HousekeepingSchedule, HousekeepingLog, HousekeepingToday } from "./types";
 
 export const getHousekeepingAreas = () =>
   api.get<HousekeepingArea[]>("/housekeeping/areas").then((r) => r.data);
@@ -9,6 +9,15 @@ export const createHousekeepingArea = (data: Partial<HousekeepingArea>) =>
 
 export const updateHousekeepingArea = (id: number, data: Partial<HousekeepingArea>) =>
   api.patch<HousekeepingArea>(`/housekeeping/areas/${id}`, data).then((r) => r.data);
+
+export const getHousekeepingSchedules = (area_id?: number) =>
+  api.get<HousekeepingSchedule[]>("/housekeeping/schedules", { params: area_id ? { area_id } : {} }).then((r) => r.data);
+
+export const createHousekeepingSchedule = (data: Partial<HousekeepingSchedule>) =>
+  api.post<HousekeepingSchedule>("/housekeeping/schedules", data).then((r) => r.data);
+
+export const updateHousekeepingSchedule = (id: number, data: Partial<HousekeepingSchedule>) =>
+  api.patch<HousekeepingSchedule>(`/housekeeping/schedules/${id}`, data).then((r) => r.data);
 
 export const getHousekeepingLogs = (params?: { area_id?: number; date_from?: string; date_to?: string }) =>
   api.get<HousekeepingLog[]>("/housekeeping/logs", { params }).then((r) => r.data);

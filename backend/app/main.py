@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 import os
 
 from app.core.config import settings
-from app.api.v1 import auth, assets, stp, water, dg, ppm, compliance, inventory, complaints, dashboard, reports, sync, service, housekeeping
+from app.api.v1 import auth, assets, stp, water, dg, ppm, compliance, inventory, complaints, dashboard, reports, sync, service, housekeeping, locations
 
 app = FastAPI(title="SocietyOps API", version="1.0.0")
 
@@ -31,6 +31,7 @@ app.include_router(reports.router, prefix=PREFIX)
 app.include_router(sync.router, prefix=PREFIX)
 app.include_router(service.router, prefix=PREFIX)
 app.include_router(housekeeping.router, prefix=PREFIX)
+app.include_router(locations.router, prefix=PREFIX)
 
 # QR scan redirect
 from fastapi.responses import RedirectResponse

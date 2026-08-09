@@ -188,6 +188,32 @@ export interface ServiceRecord {
   photo_url: string | null;
 }
 
+export interface Block {
+  id: number;
+  society_id: number;
+  name: string;
+  description: string | null;
+  is_active: boolean;
+}
+
+export interface Floor {
+  id: number;
+  society_id: number;
+  block_id: number;
+  name: string;
+  description: string | null;
+  is_active: boolean;
+}
+
+export interface CommonArea {
+  id: number;
+  society_id: number;
+  name: string;
+  block_id: number | null;
+  description: string | null;
+  is_active: boolean;
+}
+
 export type HousekeepingAreaType =
   | "CORRIDOR" | "STAIRCASE" | "LOBBY" | "PARKING" | "COMMON_ROOM"
   | "CLUBHOUSE" | "GARDEN" | "TERRACE" | "OTHER";
@@ -196,13 +222,28 @@ export type HousekeepingActivityType =
   | "DRY_SWEEPING" | "WET_MOPPING" | "PARKING_CLEANING" | "ROOM_CLEANING"
   | "GARBAGE_COLLECTION" | "GLASS_CLEANING" | "OTHER";
 
+export type HousekeepingFrequency =
+  | "DAILY" | "ALTERNATE_DAYS" | "WEEKLY" | "FORTNIGHTLY" | "CUSTOM_DAYS";
+
 export interface HousekeepingArea {
   id: number;
   society_id: number;
   name: string;
   area_type: HousekeepingAreaType;
-  location: string | null;
-  expected_activities: HousekeepingActivityType[] | null;
+  block_id: number | null;
+  floor_id: number | null;
+  common_area_id: number | null;
+  is_active: boolean;
+}
+
+export interface HousekeepingSchedule {
+  id: number;
+  society_id: number;
+  area_id: number;
+  activity_type: HousekeepingActivityType;
+  frequency: HousekeepingFrequency;
+  custom_interval_days: number | null;
+  next_due: string;
   is_active: boolean;
 }
 
@@ -210,6 +251,7 @@ export interface HousekeepingLog {
   id: number;
   society_id: number;
   area_id: number;
+  schedule_id: number | null;
   activity_type: HousekeepingActivityType;
   client_uuid: string | null;
   logged_at: string;
@@ -219,17 +261,22 @@ export interface HousekeepingLog {
 }
 
 export interface TodayActivityStatus {
+  schedule_id: number;
   activity_type: HousekeepingActivityType;
+  frequency: HousekeepingFrequency;
   done: boolean;
+  overdue: boolean;
   logged_at: string | null;
   completed_by_name: string | null;
   log_id: number | null;
+  next_due: string;
 }
 
 export interface TodayAreaStatus {
   area_id: number;
   area_name: string;
   area_type: HousekeepingAreaType;
+  location_label: string;
   activities: TodayActivityStatus[];
   all_done: boolean;
 }
