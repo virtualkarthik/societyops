@@ -1,10 +1,49 @@
 version: "3.9"
 
 services:
-  societyops-backend:
+  societyops-db:
+    image: postgres:16-alpine
+    container_name: societyops-db
+    restart: unless-stopped
     environment:
+      POSTGRES_DB: ${POSTGRES_DB:-societyops}
+      POSTGRES_USER: ${POSTGRES_USER:-societyops}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-societyops_dev}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-societyops}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  societyops-backend:
+    image: ghcr.io/virtualkarthik/societyops-backend:${IMAGE_TAG:-latest}
+    container_name: societyops-backend
+    restart: unless-stopped
+    depends_on:
+      societyops-db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-societyops}:${POSTGRES_PASSWORD:-societyops_dev}@societyops-db:5432/${POSTGRES_DB:-societyops}
+      DATABASE_URL_SYNC: postgresql://${POSTGRES_USER:-societyops}:${POSTGRES_PASSWORD:-societyops_dev}@societyops-db:5432/${POSTGRES_DB:-societyops}
+      SECRET_KEY: ${SECRET_KEY:-change-me-in-production-use-32-chars-min}
+      UPLOADS_DIR: /uploads
       FRONTEND_ORIGIN: ${FRONTEND_ORIGIN}
+    volumes:
+      - uploads:/uploads
+    ports:
+      - "8000:8000"
 
   societyops-frontend:
+    image: ghcr.io/virtualkarthik/societyops-frontend:${IMAGE_TAG:-latest}
+    container_name: societyops-frontend
+    restart: unless-stopped
+    depends_on:
+      - societyops-backend
     ports:
       - "80:80"
+
+volumes:
+  pgdata:
+  uploads:
