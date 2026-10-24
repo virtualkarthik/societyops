@@ -27,3 +27,11 @@ class UserOut(BaseModel):
     is_active: bool
 
     model_config = {"from_attributes": True}
+
+
+class MeOut(UserOut):
+    society_name: str | None = None
+
+
+class BrandingOut(BaseModel):
+    society_name: str | None

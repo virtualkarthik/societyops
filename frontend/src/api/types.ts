@@ -8,6 +8,7 @@ export interface User {
   phone: string | null;
   role: UserRole;
   is_active: boolean;
+  society_name?: string | null; // only on /auth/me
 }
 
 export type AssetType =

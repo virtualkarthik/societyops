@@ -22,11 +22,12 @@ export function OnlineIndicator() {
     <div className="flex items-center gap-2">
       <span
         className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
-          online ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+          online ? "bg-green-100 text-green-800 py-1.5 sm:py-0.5" : "bg-red-100 text-red-800"
         }`}
       >
         <span className={`h-1.5 w-1.5 rounded-full ${online ? "bg-green-500" : "bg-red-500"}`} />
-        {online ? t("sync.online") : t("sync.offline")}
+        {/* Phones: "Online" collapses to the green dot to make room; "Offline" always shows */}
+        <span className={online ? "sr-only sm:not-sr-only" : ""}>{online ? t("sync.online") : t("sync.offline")}</span>
       </span>
       {online && (
         <button

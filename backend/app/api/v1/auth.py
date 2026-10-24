@@ -3,8 +3,9 @@ from sqlalchemy import func, select
 from app.core.deps import CurrentUser, DB
 from app.core.identity import is_email, normalize_phone
 from app.core.security import verify_password, create_access_token, hash_password
+from app.models.society import Society
 from app.models.user import User
-from app.schemas.auth import LoginRequest, TokenResponse, UserOut
+from app.schemas.auth import BrandingOut, LoginRequest, MeOut, TokenResponse
 from app.schemas.user import ChangePasswordRequest
 from app.services.audit import log_audit
 
@@ -32,9 +33,18 @@ async def login(body: LoginRequest, db: DB):
     return TokenResponse(access_token=token)
 
 
-@router.get("/me", response_model=UserOut)
-async def me(current_user: CurrentUser):
-    return current_user
+@router.get("/me", response_model=MeOut)
+async def me(current_user: CurrentUser, db: DB):
+    society = await db.get(Society, current_user.society_id)
+    return MeOut.model_validate(current_user).model_copy(update={"society_name": society.name if society else None})
+
+
+@router.get("/branding", response_model=BrandingOut)
+async def branding(db: DB):
+    """Public: the society name for the login screen. Each production instance
+    serves one society; with several (e.g. a shared demo) nothing is revealed."""
+    names = (await db.scalars(select(Society.name).limit(2))).all()
+    return BrandingOut(society_name=names[0] if len(names) == 1 else None)
 
 
 @router.post("/change-password", status_code=status.HTTP_204_NO_CONTENT)

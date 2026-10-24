@@ -131,3 +131,14 @@ async def test_operator_without_email_logs_in_by_phone(client, async_db):
     uid = body["user"]["id"]
     cleared = await client.patch(f"/api/v1/users/{uid}", headers=_auth(admin), json={"phone": ""})
     assert cleared.status_code == 400
+
+
+@pytest.mark.asyncio
+async def test_me_includes_society_name(client, async_db):
+    _, admin, _, _ = await _setup(async_db)
+    resp = await client.get("/api/v1/auth/me", headers=_auth(admin))
+    assert resp.status_code == 200
+    assert resp.json()["society_name"].startswith("Soc ")
+    # Several societies in this test DB -> the public endpoint reveals nothing
+    resp = await client.get("/api/v1/auth/branding")
+    assert resp.status_code == 200 and resp.json() == {"society_name": None}

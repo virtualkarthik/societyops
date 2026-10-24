@@ -2,6 +2,7 @@ import { useState, type ReactNode } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../hooks/useAuth";
+import { useSocietyName } from "../hooks/useSocietyName";
 import { OnlineIndicator } from "./OnlineIndicator";
 import { ChangePasswordModal } from "./ChangePasswordModal";
 
@@ -25,6 +26,7 @@ export function Layout({ children }: { children: ReactNode }) {
   const { t, i18n } = useTranslation();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const societyName = useSocietyName();
   const [open, setOpen] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
 
@@ -41,15 +43,23 @@ export function Layout({ children }: { children: ReactNode }) {
       {/* Top bar */}
       <header className="bg-gradient-to-r from-brand-dark via-brand to-teal-600 text-white shadow-md z-20 sticky top-0">
         <div className="flex items-center justify-between gap-2 px-4 py-3 max-w-7xl mx-auto">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 min-w-0">
             <button className="md:hidden" onClick={() => setOpen(!open)} aria-label="Menu">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            <span className="flex items-center gap-2">
-              <img src="/icons/logo.svg" alt="" className="w-7 h-7 rounded-lg ring-1 ring-white/30" />
-              <span className="text-lg md:text-xl font-bold tracking-tight">SocietyOps</span>
+            <span className="flex items-center gap-2 min-w-0">
+              <img src="/icons/logo.svg" alt="" className="w-8 h-8 rounded-lg ring-1 ring-white/30 shrink-0" />
+              {societyName ? (
+                <span className="flex flex-col min-w-0 leading-tight">
+                  {/* On phones the name may wrap to two lines rather than be cut off */}
+                  <span className="text-sm sm:text-base md:text-lg font-bold tracking-tight line-clamp-2 md:truncate">{societyName}</span>
+                  <span className="hidden sm:block text-[11px] font-medium text-white/70 tracking-wide">SocietyOps</span>
+                </span>
+              ) : (
+                <span className="text-lg md:text-xl font-bold tracking-tight">SocietyOps</span>
+              )}
             </span>
           </div>
           <div className="flex items-center gap-2 md:gap-4 shrink-0">

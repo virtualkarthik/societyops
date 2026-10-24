@@ -11,3 +11,8 @@ export async function getMe(): Promise<User> {
   const res = await api.get<User>("/auth/me");
   return res.data;
 }
+
+export async function getBranding(): Promise<{ society_name: string | null }> {
+  const res = await api.get<{ society_name: string | null }>("/auth/branding");
+  return res.data;
+}

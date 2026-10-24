@@ -4,11 +4,13 @@ import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
 import { login } from "../../api/auth";
 import { useAuth } from "../../hooks/useAuth";
+import { useSocietyName } from "../../hooks/useSocietyName";
 
 export function LoginPage() {
   const { t } = useTranslation();
   const { setToken } = useAuth();
   const navigate = useNavigate();
+  const societyName = useSocietyName();
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -32,8 +34,17 @@ export function LoginPage() {
       <div className="w-full max-w-sm bg-white rounded-3xl shadow-xl shadow-brand/10 ring-1 ring-gray-100 p-8">
         <div className="text-center mb-8">
           <img src="/icons/logo.svg" alt="" className="w-14 h-14 mx-auto mb-3 rounded-2xl shadow-md shadow-brand/30" />
-          <h1 className="text-3xl font-bold text-brand-dark tracking-tight">SocietyOps</h1>
-          <p className="text-gray-500 text-sm mt-1">{t("app.tagline")}</p>
+          {societyName ? (
+            <>
+              <h1 className="text-3xl font-bold text-brand-dark tracking-tight">{societyName}</h1>
+              <p className="text-gray-500 text-sm mt-1">{t("app.tagline")}</p>
+            </>
+          ) : (
+            <>
+              <h1 className="text-3xl font-bold text-brand-dark tracking-tight">SocietyOps</h1>
+              <p className="text-gray-500 text-sm mt-1">{t("app.tagline")}</p>
+            </>
+          )}
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -69,7 +80,7 @@ export function LoginPage() {
           </button>
         </form>
         <p className="text-center text-xs text-gray-400 mt-6">
-          Society Maintenance & Operations
+          {societyName ? <>Powered by <span className="font-semibold text-brand">SocietyOps</span></> : t("app.tagline")}
         </p>
       </div>
     </div>
