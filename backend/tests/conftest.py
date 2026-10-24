@@ -14,6 +14,15 @@ from app.db.base import Base
 from app.core.config import settings
 
 
+def pytest_collection_modifyitems(items):
+    # The async engine fixture is session-scoped, so every async test must share
+    # the session event loop or asyncpg raises "attached to a different loop".
+    session_scope_marker = pytest.mark.asyncio(loop_scope="session")
+    for item in items:
+        if pytest_asyncio.is_async_test(item):
+            item.add_marker(session_scope_marker, append=False)
+
+
 # ── Sync engine for simple unit tests ─────────────────────────────────────────
 
 @pytest.fixture(scope="session")

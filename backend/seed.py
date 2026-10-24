@@ -25,6 +25,9 @@ from app.models.dg import DGLog, FuelPurchase
 from app.models.ppm import PPMTask, PPMFrequency
 from app.models.compliance import ComplianceDoc
 
+if os.environ.get("APP_ENV") == "production":
+    sys.exit("Refusing to run demo seed: it wipes all data. Use bootstrap_society.py in production.")
+
 engine = create_engine(settings.DATABASE_URL_SYNC)
 
 with Session(engine) as session:

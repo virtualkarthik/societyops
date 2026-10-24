@@ -1,3 +1,3 @@
-136.115.186.144.nip.io {
+{$DOMAIN} {
 	reverse_proxy societyops-frontend:80
 }

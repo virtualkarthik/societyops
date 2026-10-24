@@ -53,6 +53,37 @@ npm run dev        # http://localhost:5173
 
 ---
 
+## Production Instances
+
+Each society gets its own GCP VM (Postgres + FastAPI + nginx + Caddy with automatic HTTPS). Instances are described by files in `scripts/targets/`:
+
+| Target | VM | Purpose |
+|---|---|---|
+| `demo` | `societyops-vm` | Sunrise Apartments sample data |
+| `opera` | `opera-vm` | Opera Apartments (production) |
+
+```bash
+./scripts/provision.sh <target>   # one-time: IP, VM, Docker, secrets, backups, deploy, bootstrap society + admin
+./scripts/deploy.sh <target>      # ship the current commit (images are shared across targets, pinned by git SHA)
+```
+
+- Secrets (`POSTGRES_PASSWORD`, `SECRET_KEY`) are generated on the VM in `/opt/societyops/.env` and never leave it.
+- Backups: nightly `pg_dump` to `/opt/societyops/backups` (14 days) + daily GCP disk snapshots (14 days).
+- `seed.py` refuses to run in production (`APP_ENV=production`) because it wipes all data.
+
+### Managing users on an instance
+
+There is no user-management UI yet; use the CLI over SSH:
+
+```bash
+gcloud compute ssh opera-vm --zone us-central1-a --command \
+  "cd /opt/societyops && sudo docker compose -f docker-compose.prod.yml exec -T societyops-backend python manage_users.py add --email ops@example.com --name 'Ravi' --role operator"
+```
+
+Commands: `list`, `add --email --name --role {super_admin,committee,operator,resident}`, `reset-password --email`, `deactivate --email`.
+
+---
+
 ## QR Scan Flow
 
 1. Go to **Assets** → click **QR** link for any asset → download the PNG
