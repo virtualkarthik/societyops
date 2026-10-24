@@ -230,14 +230,14 @@ export function DGLogPage() {
         <TrendChart
           title="Diesel Consumed — Last 5 Days"
           data={trendData}
-          series={[{ key: "diesel_consumed", label: "Consumed (L)", color: "#f59e0b", type: "bar" }]}
+          series={[{ key: "diesel_consumed", label: "Consumed (L)", color: "#d97706", type: "bar" }]}
           yUnit=" L"
           height={180}
         />
         <TrendChart
           title="Load kW — Last 5 Days"
           data={trendData}
-          series={[{ key: "load_kw", label: "Avg Load (kW)", color: "#1e40af" }]}
+          series={[{ key: "load_kw", label: "Avg Load (kW)", color: "#0d9488" }]}
           yUnit=" kW"
           height={180}
         />

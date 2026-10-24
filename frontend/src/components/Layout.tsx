@@ -39,7 +39,7 @@ export function Layout({ children }: { children: ReactNode }) {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {changingPassword && <ChangePasswordModal onClose={() => setChangingPassword(false)} />}
       {/* Top bar */}
-      <header className="bg-brand text-white shadow-md z-20 sticky top-0">
+      <header className="bg-gradient-to-r from-brand-dark via-brand to-teal-600 text-white shadow-md z-20 sticky top-0">
         <div className="flex items-center justify-between gap-2 px-4 py-3 max-w-7xl mx-auto">
           <div className="flex items-center gap-3">
             <button className="md:hidden" onClick={() => setOpen(!open)} aria-label="Menu">
@@ -47,7 +47,10 @@ export function Layout({ children }: { children: ReactNode }) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            <span className="text-lg md:text-xl font-bold tracking-tight">SocietyOps</span>
+            <span className="flex items-center gap-2">
+              <img src="/icons/logo.svg" alt="" className="w-7 h-7 rounded-lg ring-1 ring-white/30" />
+              <span className="text-lg md:text-xl font-bold tracking-tight">SocietyOps</span>
+            </span>
           </div>
           <div className="flex items-center gap-2 md:gap-4 shrink-0">
             <OnlineIndicator />
@@ -77,7 +80,7 @@ export function Layout({ children }: { children: ReactNode }) {
         <aside
           className={`${
             open ? "block" : "hidden"
-          } md:block w-56 bg-white border-r border-gray-200 shrink-0 z-10`}
+          } md:block w-56 bg-white/80 border-r border-gray-200 shrink-0 z-10`}
         >
           <nav className="p-3 space-y-1">
             {filteredNav.map(({ to, key }) => (
@@ -87,7 +90,7 @@ export function Layout({ children }: { children: ReactNode }) {
                 onClick={() => setOpen(false)}
                 className={({ isActive }) =>
                   `block rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                    isActive ? "bg-brand text-white" : "text-gray-700 hover:bg-gray-100"
+                    isActive ? "bg-brand-light/70 text-brand-dark font-semibold" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
                   }`
                 }
               >

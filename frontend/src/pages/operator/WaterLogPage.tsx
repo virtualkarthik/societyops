@@ -219,14 +219,14 @@ export function WaterLogPage() {
         <TrendChart
           title="Water Level — Last 5 Days"
           data={trendData}
-          series={[{ key: "water_level", label: "Avg Level (m)", color: "#0ea5e9" }]}
+          series={[{ key: "water_level", label: "Avg Level (m)", color: "#0284c7" }]}
           yUnit=" m"
           height={180}
         />
         <TrendChart
           title="Borewell Run Hours — Last 5 Days"
           data={trendData}
-          series={[{ key: "borewell_run_hours", label: "Run Hrs", color: "#10b981", type: "bar" }]}
+          series={[{ key: "borewell_run_hours", label: "Run Hrs", color: "#0d9488", type: "bar" }]}
           yUnit=" hrs"
           height={180}
         />

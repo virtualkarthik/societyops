@@ -3,8 +3,13 @@ from app.models.user import UserRole
 
 
 class LoginRequest(BaseModel):
-    email: str
+    login: str | None = None  # email or phone number
+    email: str | None = None  # older app builds still send this
     password: str
+
+    @property
+    def identifier(self) -> str:
+        return (self.login or self.email or "").strip()
 
 
 class TokenResponse(BaseModel):
@@ -16,7 +21,7 @@ class UserOut(BaseModel):
     id: int
     society_id: int
     name: str
-    email: str
+    email: str | None
     phone: str | None
     role: UserRole
     is_active: bool

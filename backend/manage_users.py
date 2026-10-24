@@ -1,10 +1,10 @@
 """
-User admin CLI (the app has no user-management UI yet).
+User admin CLI for recovery over SSH (day-to-day: the Users page in the app).
 
     python manage_users.py list
-    python manage_users.py add --email op@x.in --name "Ravi" --role operator [--phone ...]
-    python manage_users.py reset-password --email op@x.in
-    python manage_users.py deactivate --email op@x.in
+    python manage_users.py add --name "Ravi" --role operator --phone 9876543210 [--email op@x.in]
+    python manage_users.py reset-password --user 9876543210      (email or phone)
+    python manage_users.py deactivate --user op@x.in
 
 New users join the only society on the instance (or pass --society-id).
 Generated passwords are printed once.
@@ -20,6 +20,7 @@ from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
+from app.core.identity import is_email, normalize_email, normalize_phone
 from app.core.security import hash_password
 from app.models.society import Society
 from app.models.user import User, UserRole
@@ -34,10 +35,14 @@ def resolve_society_id(session: Session, society_id: int | None) -> int:
     return ids[0]
 
 
-def get_user(session: Session, email: str) -> User:
-    user = session.scalar(select(User).where(User.email == email))
+def get_user(session: Session, identifier: str) -> User:
+    if is_email(identifier):
+        clause = User.email == normalize_email(identifier)
+    else:
+        clause = User.phone == normalize_phone(identifier)
+    user = session.scalar(select(User).where(clause))
     if user is None:
-        sys.exit(f"No user with email {email}")
+        sys.exit(f"No user with email/phone {identifier}")
     return user
 
 
@@ -46,13 +51,13 @@ def main() -> None:
     sub = parser.add_subparsers(dest="cmd", required=True)
     sub.add_parser("list")
     add = sub.add_parser("add")
-    add.add_argument("--email", required=True)
+    add.add_argument("--email")
     add.add_argument("--name", required=True)
     add.add_argument("--role", required=True, choices=[r.value for r in UserRole])
     add.add_argument("--phone")
     add.add_argument("--society-id", type=int)
     for name in ("reset-password", "deactivate"):
-        sub.add_parser(name).add_argument("--email", required=True)
+        sub.add_parser(name).add_argument("--user", required=True, help="email or phone")
     args = parser.parse_args()
 
     engine = create_engine(settings.DATABASE_URL_SYNC)
@@ -60,25 +65,30 @@ def main() -> None:
         if args.cmd == "list":
             for u in session.scalars(select(User).order_by(User.society_id, User.role, User.email)):
                 status = "active" if u.is_active else "inactive"
-                print(f"{u.society_id}\t{u.role.value:<12}\t{status:<8}\t{u.email}\t{u.name}")
+                print(f"{u.society_id}\t{u.role.value:<12}\t{status:<8}\t{u.email or '-'}\t{u.phone or '-'}\t{u.name}")
             return
 
         password = None
         if args.cmd == "add":
-            if session.scalar(select(User).where(User.email == args.email)):
-                sys.exit(f"User {args.email} already exists")
+            email = normalize_email(args.email) if args.email else None
+            phone = normalize_phone(args.phone) if args.phone else None
+            if not email and not phone:
+                sys.exit("Pass --email and/or --phone")
+            if (email and session.scalar(select(User).where(User.email == email))) or \
+                    (phone and session.scalar(select(User).where(User.phone == phone))):
+                sys.exit("A user with this email/phone already exists")
             password = secrets.token_urlsafe(9)
             session.add(User(society_id=resolve_society_id(session, args.society_id),
-                             name=args.name, email=args.email, phone=args.phone,
+                             name=args.name, email=email, phone=phone,
                              role=UserRole(args.role), password_hash=hash_password(password)))
         elif args.cmd == "reset-password":
             password = secrets.token_urlsafe(9)
-            get_user(session, args.email).password_hash = hash_password(password)
+            get_user(session, args.user).password_hash = hash_password(password)
         elif args.cmd == "deactivate":
-            get_user(session, args.email).is_active = False
+            get_user(session, args.user).is_active = False
         session.commit()
 
-    print(f"{args.cmd}: {args.email} OK")
+    print(f"{args.cmd}: {getattr(args, 'user', None) or args.email or args.phone} OK")
     if password:
         print(f"PASSWORD={password}")
 

@@ -3,14 +3,14 @@ import type { User, UserRole, UserWithPassword } from "./types";
 
 export interface UserInput {
   name: string;
-  email: string;
+  email: string | null;
   phone: string | null;
   role: UserRole;
 }
 
 export const getUsers = () => api.get<User[]>("/users").then((r) => r.data);
 export const createUser = (data: UserInput) => api.post<UserWithPassword>("/users", data).then((r) => r.data);
-export const updateUser = (id: number, data: Partial<Omit<UserInput, "email">> & { is_active?: boolean }) =>
+export const updateUser = (id: number, data: Partial<UserInput> & { is_active?: boolean }) =>
   api.patch<User>(`/users/${id}`, data).then((r) => r.data);
 export const resetUserPassword = (id: number) =>
   api.post<UserWithPassword>(`/users/${id}/reset-password`).then((r) => r.data);

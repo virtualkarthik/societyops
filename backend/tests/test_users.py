@@ -98,3 +98,36 @@ async def test_reset_deactivate_and_self_lockout_guard(client, async_db):
         resp = await client.patch(f"/api/v1/users/{admin.id}", json=change, headers=_auth(admin))
         assert resp.status_code == 400
     assert (await client.patch(f"/api/v1/users/{admin.id}", json={"name": "Renamed"}, headers=_auth(admin))).status_code == 200
+
+
+@pytest.mark.asyncio
+async def test_operator_without_email_logs_in_by_phone(client, async_db):
+    tag, admin, _, _ = await _setup(async_db)
+    local = "9" + str(int(tag, 16) % 10**9).zfill(9)  # unique 10-digit mobile per run
+
+    resp = await client.post("/api/v1/users", headers=_auth(admin),
+                             json={"name": "Phone Op", "phone": f"{local[:5]} {local[5:]}", "role": "operator"})
+    assert resp.status_code == 201, resp.text
+    body = resp.json()
+    assert body["user"]["email"] is None
+    assert body["user"]["phone"] == f"+91{local}"
+    pw = body["temporary_password"]
+
+    # Any common way of typing the number works
+    for typed in (local, f"0{local}", f"+91 {local[:5]} {local[5:]}", f"91-{local}"):
+        r = await client.post("/api/v1/auth/login", json={"login": typed, "password": pw})
+        assert r.status_code == 200, typed
+    # Older app builds send `email`
+    assert (await client.post("/api/v1/auth/login", json={"email": local, "password": pw})).status_code == 200
+    assert (await client.post("/api/v1/auth/login", json={"login": "12", "password": pw})).status_code == 401
+
+    dup = await client.post("/api/v1/users", headers=_auth(admin),
+                            json={"name": "Dup", "phone": f"+91{local}", "role": "operator"})
+    assert dup.status_code == 409
+
+    neither = await client.post("/api/v1/users", headers=_auth(admin), json={"name": "X", "role": "operator"})
+    assert neither.status_code == 422
+
+    uid = body["user"]["id"]
+    cleared = await client.patch(f"/api/v1/users/{uid}", headers=_auth(admin), json={"phone": ""})
+    assert cleared.status_code == 400

@@ -248,7 +248,7 @@ export function STPLogPage() {
         <TrendChart
           title="MLSS Trend — Last 5 Days"
           data={trendData}
-          series={[{ key: "mlss", label: "Avg MLSS", color: "#0ea5e9" }]}
+          series={[{ key: "mlss", label: "Avg MLSS", color: "#0284c7" }]}
           yUnit=" mg/L"
           height={180}
         />

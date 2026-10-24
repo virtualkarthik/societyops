@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import func, select
 from app.core.deps import CurrentUser, DB
+from app.core.identity import is_email, normalize_phone
 from app.core.security import verify_password, create_access_token, hash_password
 from app.models.user import User
 from app.schemas.auth import LoginRequest, TokenResponse, UserOut
@@ -10,10 +11,21 @@ from app.services.audit import log_audit
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
+async def find_user_by_login(db: DB, identifier: str) -> User | None:
+    """Look up an active user by email (contains '@') or phone number."""
+    if is_email(identifier):
+        clause = func.lower(User.email) == identifier.lower()
+    else:
+        try:
+            clause = User.phone == normalize_phone(identifier)
+        except ValueError:
+            return None
+    return await db.scalar(select(User).where(clause, User.is_active == True))
+
+
 @router.post("/login", response_model=TokenResponse)
 async def login(body: LoginRequest, db: DB):
-    result = await db.execute(select(User).where(func.lower(User.email) == body.email.strip().lower(), User.is_active == True))
-    user = result.scalar_one_or_none()
+    user = await find_user_by_login(db, body.identifier)
     if not user or not verify_password(body.password, user.password_hash):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
     token = create_access_token({"sub": str(user.id), "role": user.role, "society_id": user.society_id})

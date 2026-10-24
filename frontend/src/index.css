@@ -4,10 +4,14 @@
 
 @layer base {
   body {
-    @apply antialiased text-gray-900;
+    @apply antialiased text-gray-900 bg-gray-50;
   }
   /* Ensure tap targets are large enough on mobile */
   button, [role="button"], input[type="submit"] {
     min-height: 44px;
+  }
+  /* Brand focus ring everywhere instead of the browser's default blue */
+  input:focus, select:focus, textarea:focus {
+    @apply outline-none border-brand ring-2 ring-brand/40;
   }
 }

@@ -34,11 +34,21 @@ async def list_users(db: DB, current_user: User = SuperAdmin):
     return result.scalars().all()
 
 
+async def _ensure_unique(db: DB, email: str | None, phone: str | None, exclude_id: int | None = None) -> None:
+    # Emails and phones are unique across the whole instance, not just this society.
+    for column, value, label in ((User.email, email, "email"), (User.phone, phone, "phone number")):
+        if value is None:
+            continue
+        q = select(User.id).where(func.lower(column) == value.lower())
+        if exclude_id is not None:
+            q = q.where(User.id != exclude_id)
+        if await db.scalar(q):
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"A user with this {label} already exists")
+
+
 @router.post("", response_model=UserWithPassword, status_code=status.HTTP_201_CREATED)
 async def create_user(body: UserCreate, db: DB, current_user: User = SuperAdmin):
-    # Emails are unique across the whole instance, not just this society.
-    if await db.scalar(select(User.id).where(func.lower(User.email) == body.email)):
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="A user with this email already exists")
+    await _ensure_unique(db, body.email, body.phone)
     password = _temporary_password()
     user = User(society_id=current_user.society_id, password_hash=hash_password(password), **body.model_dump())
     db.add(user)
@@ -58,6 +68,12 @@ async def update_user(user_id: int, body: UserUpdate, db: DB, current_user: User
     ):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail="You cannot deactivate yourself or remove your own admin role")
+    if ("email" in changes or "phone" in changes) and not (
+        changes.get("email", user.email) or changes.get("phone", user.phone)
+    ):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="A user needs an email or a phone number to log in")
+    await _ensure_unique(db, changes.get("email"), changes.get("phone"), exclude_id=user.id)
     before = {k: getattr(user, k) for k in changes}
     for k, v in changes.items():
         setattr(user, k, v)

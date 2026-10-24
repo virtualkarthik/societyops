@@ -1,33 +1,46 @@
 from typing import Optional
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
+from app.core.identity import normalize_email, normalize_phone
 from app.models.user import UserRole
 from app.schemas.auth import UserOut
 
 MIN_PASSWORD_LENGTH = 8
 
 
-def _normalize_email(v: str) -> str:
-    v = v.strip().lower()
-    if "@" not in v or v.startswith("@") or v.endswith("@"):
-        raise ValueError("Invalid email address")
-    return v
+def _email_or_none(v: Optional[str]) -> Optional[str]:
+    return normalize_email(v) if v and v.strip() else None
+
+
+def _phone_or_none(v: Optional[str]) -> Optional[str]:
+    return normalize_phone(v) if v and v.strip() else None
 
 
 class UserCreate(BaseModel):
     name: str = Field(min_length=1, max_length=200)
-    email: str = Field(max_length=200)
-    phone: Optional[str] = Field(default=None, max_length=20)
+    email: Optional[str] = Field(default=None, max_length=200)
+    phone: Optional[str] = Field(default=None, max_length=30)
     role: UserRole
 
-    _email = field_validator("email")(_normalize_email)
+    _email = field_validator("email")(_email_or_none)
+    _phone = field_validator("phone")(_phone_or_none)
+
+    @model_validator(mode="after")
+    def _needs_login_identifier(self):
+        if not self.email and not self.phone:
+            raise ValueError("Enter an email or a phone number so the user can log in")
+        return self
 
 
 class UserUpdate(BaseModel):
     name: Optional[str] = Field(default=None, min_length=1, max_length=200)
-    phone: Optional[str] = Field(default=None, max_length=20)
+    email: Optional[str] = Field(default=None, max_length=200)
+    phone: Optional[str] = Field(default=None, max_length=30)
     role: Optional[UserRole] = None
     is_active: Optional[bool] = None
+
+    _email = field_validator("email")(_email_or_none)
+    _phone = field_validator("phone")(_phone_or_none)
 
 
 class UserWithPassword(BaseModel):

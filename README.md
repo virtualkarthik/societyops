@@ -23,7 +23,7 @@ The app is now available at:
 
 | Role | Email | Password |
 |---|---|---|
-| Super Admin | admin@sunriseapts.in | admin123 |
+| Super Admin | admin@sunriseapts.in (or 9876543210) | admin123 |
 | Committee | committee@sunriseapts.in | committee123 |
 | Operator | operator@sunriseapts.in | operator123 |
 | Resident | resident@sunriseapts.in | resident123 |
@@ -73,16 +73,18 @@ Each society gets its own GCP VM (Postgres + FastAPI + nginx + Caddy with automa
 
 ### Managing users
 
+Users log in with their **email or mobile number** (operators often have no email). Numbers are stored normalised as `+91XXXXXXXXXX`, so `98765 43210`, `098765-43210` and `+91 98765 43210` all work at the login screen.
+
 Super admins manage users from the **Users** page in the app: add users (a one-time temporary password is shown to share with them), change roles, reset passwords, and deactivate accounts (which blocks login immediately). Every user can change their own password from **Change Password** in the header (or the menu on mobile).
 
 For recovery when nobody can log in (e.g. the only admin lost their password), the same actions are available over SSH:
 
 ```bash
 gcloud compute ssh opera-vm --zone us-central1-a --command \
-  "cd /opt/societyops && sudo docker compose -f docker-compose.prod.yml exec -T societyops-backend python manage_users.py reset-password --email admin@example.com"
+  "cd /opt/societyops && sudo docker compose -f docker-compose.prod.yml exec -T societyops-backend python manage_users.py reset-password --user admin@example.com"
 ```
 
-Commands: `list`, `add --email --name --role {super_admin,committee,operator,resident}`, `reset-password --email`, `deactivate --email`.
+Commands: `list`, `add --name --role {super_admin,committee,operator,resident} [--phone] [--email]` (at least one of phone/email), `reset-password --user <email-or-phone>`, `deactivate --user <email-or-phone>`.
 
 ---
 

@@ -8,8 +8,9 @@ import {
   ReferenceLine,
 } from "recharts";
 
-const BRAND = "#1e40af";
-const COLORS = ["#1e40af", "#0ea5e9", "#10b981", "#f59e0b", "#ef4444"];
+// Categorical order validated for CVD separation (dataviz validate_palette.js, light surface).
+const BRAND = "#0d9488";
+const COLORS = ["#0d9488", "#d97706", "#7c3aed", "#0284c7", "#e11d48"];
 
 interface Series {
   key: string;

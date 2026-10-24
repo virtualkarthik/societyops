@@ -74,7 +74,7 @@ export function DashboardPage() {
 
         {/* DG Fuel */}
         <StatCard title="DG Fuel Stock">
-          <div className="text-4xl font-bold text-blue-600 mb-1">
+          <div className="text-4xl font-bold text-brand mb-1">
             {data.dg_fuel.estimated_stock_litres.toFixed(0)} L
           </div>
           <div className="text-xs text-gray-500 space-y-0.5">

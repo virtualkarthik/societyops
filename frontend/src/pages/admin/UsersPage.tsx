@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import { useAuth } from "../../hooks/useAuth";
 import { getUsers, createUser, updateUser, resetUserPassword, apiErrorMessage } from "../../api/users";
 import type { User, UserRole, UserWithPassword } from "../../api/types";
+import { formatPhone } from "../../lib/phone";
 
 const ROLES: UserRole[] = ["super_admin", "committee", "operator", "resident"];
 
@@ -28,6 +29,13 @@ const ROLE_COLORS: Record<UserRole, string> = {
   operator: "bg-amber-100 text-amber-700",
   resident: "bg-gray-100 text-gray-700",
 };
+
+/** Phone or email, whichever the user logs in with (both work when set). */
+function contactLine(u: User): string {
+  return [formatPhone(u.phone), u.email].filter(Boolean).join(" · ");
+}
+
+const phoneDigits = (v: string) => v.replace(/\D/g, "").length;
 
 function Modal({ title, subtitle, onClose, children }: {
   title: string; subtitle?: string; onClose: () => void; children: React.ReactNode;
@@ -67,7 +75,8 @@ function RolePicker({ value, onChange }: { value: UserRole; onChange: (r: UserRo
 
 function PasswordReveal({ result, heading, onClose }: { result: UserWithPassword; heading: string; onClose: () => void }) {
   const copy = () => {
-    navigator.clipboard?.writeText(`Login: ${window.location.origin}\nEmail: ${result.user.email}\nPassword: ${result.temporary_password}`)
+    const ids = [result.user.phone && `Phone: ${formatPhone(result.user.phone)}`, result.user.email && `Email: ${result.user.email}`].filter(Boolean).join("\n");
+    navigator.clipboard?.writeText(`Login: ${window.location.origin}\n${ids}\nPassword: ${result.temporary_password}`)
       .then(() => toast.success("Copied"), () => toast.error("Copy failed — select and copy manually"));
   };
   return (
@@ -77,7 +86,8 @@ function PasswordReveal({ result, heading, onClose }: { result: UserWithPassword
         This password is shown <span className="font-semibold">only once</span>; they can change it after logging in.
       </p>
       <div className="bg-gray-50 border rounded-lg p-3 text-sm space-y-1 font-mono break-all select-all">
-        <div><span className="text-gray-500">Email: </span>{result.user.email}</div>
+        {result.user.phone && <div><span className="text-gray-500">Phone: </span>{formatPhone(result.user.phone)}</div>}
+        {result.user.email && <div><span className="text-gray-500">Email: </span>{result.user.email}</div>}
         <div><span className="text-gray-500">Password: </span>{result.temporary_password}</div>
       </div>
       <div className="flex gap-2">
@@ -98,7 +108,7 @@ function AddUserModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
 
   const mutation = useMutation({
     mutationFn: () => createUser({
-      name: form.name.trim(), email: form.email.trim(), phone: form.phone.trim() || null, role: form.role,
+      name: form.name.trim(), email: form.email.trim() || null, phone: form.phone.trim() || null, role: form.role,
     }),
     onSuccess: (result) => {
       qc.invalidateQueries({ queryKey: ["users"] });
@@ -107,7 +117,8 @@ function AddUserModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
     onError: (err) => toast.error(apiErrorMessage(err, "Failed to add user")),
   });
 
-  const valid = form.name.trim() && form.email.includes("@");
+  const hasLogin = form.email.includes("@") || phoneDigits(form.phone) >= 10;
+  const valid = form.name.trim() && hasLogin;
 
   return (
     <Modal title="Add User" onClose={onClose}>
@@ -117,16 +128,18 @@ function AddUserModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
           className="w-full border rounded-lg px-3 py-2.5 text-base" autoFocus />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-        <input type="email" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-          className="w-full border rounded-lg px-3 py-2.5 text-base" autoCapitalize="none" />
-        <p className="text-xs text-gray-500 mt-1">Used to log in.</p>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Mobile number</label>
+        <input type="tel" inputMode="tel" value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+          placeholder="98765 43210" className="w-full border rounded-lg px-3 py-2.5 text-base" />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-        <input type="tel" value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
-          className="w-full border rounded-lg px-3 py-2.5 text-base" />
+        <label className="block text-sm font-medium text-gray-700 mb-1">Email <span className="font-normal text-gray-400">(optional)</span></label>
+        <input type="email" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+          className="w-full border rounded-lg px-3 py-2.5 text-base" autoCapitalize="none" />
       </div>
+      <p className={`text-xs -mt-2 ${hasLogin || !(form.phone || form.email) ? "text-gray-500" : "text-amber-700"}`}>
+        They log in with their mobile number or email; at least one is needed.
+      </p>
       <RolePicker value={form.role} onChange={(role) => setForm((f) => ({ ...f, role }))} />
       <button onClick={() => mutation.mutate()} disabled={mutation.isPending || !valid}
         className="w-full bg-brand text-white font-semibold py-3 rounded-xl text-base disabled:opacity-60">
@@ -140,11 +153,13 @@ function EditUserModal({ user, isSelf, onClose, onPasswordReset }: {
   user: User; isSelf: boolean; onClose: () => void; onPasswordReset: (r: UserWithPassword) => void;
 }) {
   const qc = useQueryClient();
-  const [form, setForm] = useState({ name: user.name, phone: user.phone ?? "", role: user.role });
+  const [form, setForm] = useState({ name: user.name, phone: formatPhone(user.phone), email: user.email ?? "", role: user.role });
   const [confirmReset, setConfirmReset] = useState(false);
 
   const save = useMutation({
-    mutationFn: () => updateUser(user.id, { name: form.name.trim(), phone: form.phone.trim() || null, role: form.role }),
+    mutationFn: () => updateUser(user.id, {
+      name: form.name.trim(), phone: form.phone.trim() || null, email: form.email.trim() || null, role: form.role,
+    }),
     onSuccess: () => {
       toast.success("User updated");
       qc.invalidateQueries({ queryKey: ["users"] });
@@ -170,23 +185,28 @@ function EditUserModal({ user, isSelf, onClose, onPasswordReset }: {
   });
 
   return (
-    <Modal title="Edit User" subtitle={user.email} onClose={onClose}>
+    <Modal title="Edit User" subtitle={contactLine(user)} onClose={onClose}>
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
         <input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
           className="w-full border rounded-lg px-3 py-2.5 text-base" />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-        <input type="tel" value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+        <label className="block text-sm font-medium text-gray-700 mb-1">Mobile number</label>
+        <input type="tel" inputMode="tel" value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
           className="w-full border rounded-lg px-3 py-2.5 text-base" />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+        <input type="email" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+          className="w-full border rounded-lg px-3 py-2.5 text-base" autoCapitalize="none" />
       </div>
       {isSelf ? (
         <p className="text-xs text-gray-500">You can't change your own role or deactivate yourself.</p>
       ) : (
         <RolePicker value={form.role} onChange={(role) => setForm((f) => ({ ...f, role }))} />
       )}
-      <button onClick={() => save.mutate()} disabled={save.isPending || !form.name.trim()}
+      <button onClick={() => save.mutate()} disabled={save.isPending || !form.name.trim() || !(form.email.trim() || form.phone.trim())}
         className="w-full bg-brand text-white font-semibold py-3 rounded-xl text-base disabled:opacity-60">
         {save.isPending ? "Saving…" : "Save Changes"}
       </button>
@@ -291,7 +311,7 @@ export function UsersPage() {
                   <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${ROLE_COLORS[u.role]}`}>{ROLE_LABELS[u.role]}</span>
                   {!u.is_active && <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-red-100 text-red-700">Inactive</span>}
                 </div>
-                <p className="text-sm text-gray-500 truncate">{u.email}{u.phone ? ` · ${u.phone}` : ""}</p>
+                <p className="text-sm text-gray-500 truncate">{contactLine(u)}</p>
               </div>
               <button onClick={() => setEditTarget(u)}
                 className="shrink-0 border border-gray-200 text-gray-600 text-xs font-medium px-3 py-1.5 rounded-lg hover:bg-gray-50">

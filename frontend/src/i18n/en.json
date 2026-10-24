@@ -20,6 +20,8 @@
   "auth": {
     "login": "Login",
     "email": "Email",
+    "email_or_phone": "Email or phone",
+    "email_or_phone_placeholder": "Email or 10-digit mobile number",
     "password": "Password",
     "signing_in": "Signing in…"
   },

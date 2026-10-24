@@ -244,7 +244,7 @@ export function PPMCompletionPage() {
         <TrendChart
           title="Completions — Last 5 Days"
           data={trendData}
-          series={[{ key: "completions", label: "Tasks Completed", color: "#10b981", type: "bar" }]}
+          series={[{ key: "completions", label: "Tasks Completed", color: "#0d9488", type: "bar" }]}
           height={180}
         />
       </div>
