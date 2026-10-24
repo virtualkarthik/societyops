@@ -13,6 +13,8 @@
     "inventory": "சரக்கு",
     "complaints": "புகார்கள்",
     "reports": "அறிக்கைகள்",
+    "users": "பயனர்கள்",
+    "change_password": "கடவுச்சொல் மாற்று",
     "logout": "வெளியேறு"
   },
   "auth": {

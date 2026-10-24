@@ -13,6 +13,8 @@
     "inventory": "Inventory",
     "complaints": "Complaints",
     "reports": "Reports",
+    "users": "Users",
+    "change_password": "Change Password",
     "logout": "Logout"
   },
   "auth": {

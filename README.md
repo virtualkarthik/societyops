@@ -71,13 +71,15 @@ Each society gets its own GCP VM (Postgres + FastAPI + nginx + Caddy with automa
 - Backups: nightly `pg_dump` to `/opt/societyops/backups` (14 days) + daily GCP disk snapshots (14 days).
 - `seed.py` refuses to run in production (`APP_ENV=production`) because it wipes all data.
 
-### Managing users on an instance
+### Managing users
 
-There is no user-management UI yet; use the CLI over SSH:
+Super admins manage users from the **Users** page in the app: add users (a one-time temporary password is shown to share with them), change roles, reset passwords, and deactivate accounts (which blocks login immediately). Every user can change their own password from **Change Password** in the header (or the menu on mobile).
+
+For recovery when nobody can log in (e.g. the only admin lost their password), the same actions are available over SSH:
 
 ```bash
 gcloud compute ssh opera-vm --zone us-central1-a --command \
-  "cd /opt/societyops && sudo docker compose -f docker-compose.prod.yml exec -T societyops-backend python manage_users.py add --email ops@example.com --name 'Ravi' --role operator"
+  "cd /opt/societyops && sudo docker compose -f docker-compose.prod.yml exec -T societyops-backend python manage_users.py reset-password --email admin@example.com"
 ```
 
 Commands: `list`, `add --email --name --role {super_admin,committee,operator,resident}`, `reset-password --email`, `deactivate --email`.

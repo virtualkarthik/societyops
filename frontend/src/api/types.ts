@@ -287,3 +287,8 @@ export interface HousekeepingToday {
   total_expected: number;
   total_done: number;
 }
+
+export interface UserWithPassword {
+  user: User;
+  temporary_password: string;
+}

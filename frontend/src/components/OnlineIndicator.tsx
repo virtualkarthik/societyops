@@ -32,7 +32,7 @@ export function OnlineIndicator() {
         <button
           onClick={handleSync}
           disabled={syncing}
-          className="text-xs text-brand underline disabled:opacity-50"
+          className="text-xs text-white underline disabled:opacity-50"
         >
           {syncing ? "Syncing…" : t("sync.sync_now")}
         </button>

@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../hooks/useAuth";
 import { OnlineIndicator } from "./OnlineIndicator";
+import { ChangePasswordModal } from "./ChangePasswordModal";
 
 const navItems = [
   { to: "/dashboard", key: "nav.dashboard", roles: ["super_admin", "committee"] },
@@ -17,6 +18,7 @@ const navItems = [
   { to: "/inventory", key: "nav.inventory", roles: ["super_admin", "committee", "operator"] },
   { to: "/complaints", key: "nav.complaints", roles: ["super_admin", "committee", "operator", "resident"] },
   { to: "/reports", key: "nav.reports", roles: ["super_admin", "committee"] },
+  { to: "/users", key: "nav.users", roles: ["super_admin"] },
 ];
 
 export function Layout({ children }: { children: ReactNode }) {
@@ -24,6 +26,7 @@ export function Layout({ children }: { children: ReactNode }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const [changingPassword, setChangingPassword] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -34,18 +37,19 @@ export function Layout({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
+      {changingPassword && <ChangePasswordModal onClose={() => setChangingPassword(false)} />}
       {/* Top bar */}
       <header className="bg-brand text-white shadow-md z-20 sticky top-0">
-        <div className="flex items-center justify-between px-4 py-3 max-w-7xl mx-auto">
+        <div className="flex items-center justify-between gap-2 px-4 py-3 max-w-7xl mx-auto">
           <div className="flex items-center gap-3">
             <button className="md:hidden" onClick={() => setOpen(!open)} aria-label="Menu">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            <span className="text-xl font-bold tracking-tight">SocietyOps</span>
+            <span className="text-lg md:text-xl font-bold tracking-tight">SocietyOps</span>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 md:gap-4 shrink-0">
             <OnlineIndicator />
             <button
               onClick={() => {
@@ -58,7 +62,10 @@ export function Layout({ children }: { children: ReactNode }) {
               {i18n.language === "en" ? "தமிழ்" : "English"}
             </button>
             <span className="hidden md:block text-sm opacity-80">{user?.name}</span>
-            <button onClick={handleLogout} className="text-sm bg-white/20 rounded px-2 py-1 hover:bg-white/30">
+            <button onClick={() => setChangingPassword(true)} className="hidden md:block text-sm bg-white/20 rounded px-2 py-1 hover:bg-white/30">
+              {t("nav.change_password")}
+            </button>
+            <button onClick={handleLogout} className="hidden md:block text-sm bg-white/20 rounded px-2 py-1 hover:bg-white/30">
               {t("nav.logout")}
             </button>
           </div>
@@ -87,6 +94,18 @@ export function Layout({ children }: { children: ReactNode }) {
                 {t(key)}
               </NavLink>
             ))}
+            {/* On mobile the header has no room for these, so they live in the menu */}
+            <div className="md:hidden border-t border-gray-200 mt-2 pt-2 space-y-1">
+              <p className="px-3 py-1 text-xs text-gray-400 truncate">{user?.name}</p>
+              <button onClick={() => { setOpen(false); setChangingPassword(true); }}
+                className="block w-full text-left rounded-lg px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100">
+                {t("nav.change_password")}
+              </button>
+              <button onClick={handleLogout}
+                className="block w-full text-left rounded-lg px-3 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50">
+                {t("nav.logout")}
+              </button>
+            </div>
           </nav>
         </aside>
 

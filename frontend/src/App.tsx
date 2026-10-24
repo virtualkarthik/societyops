@@ -17,6 +17,7 @@ import { ReportsPage } from "./pages/committee/ReportsPage";
 import { InventoryPage } from "./pages/inventory/InventoryPage";
 import { ComplaintsPage } from "./pages/complaints/ComplaintsPage";
 import { HousekeepingPage } from "./pages/housekeeping/HousekeepingPage";
+import { UsersPage } from "./pages/admin/UsersPage";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -26,7 +27,8 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 function DefaultRedirect() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+  if (loading) return <div className="flex items-center justify-center min-h-screen text-gray-400">Loading…</div>;
   if (!user) return <Navigate to="/login" replace />;
   if (["super_admin", "committee"].includes(user.role)) return <Navigate to="/dashboard" replace />;
   return <Navigate to="/operator/stp" replace />;
@@ -52,6 +54,7 @@ export default function App() {
       <Route path="/inventory" element={<ProtectedRoute><InventoryPage /></ProtectedRoute>} />
       <Route path="/complaints" element={<ProtectedRoute><ComplaintsPage /></ProtectedRoute>} />
       <Route path="/housekeeping" element={<ProtectedRoute><HousekeepingPage /></ProtectedRoute>} />
+      <Route path="/users" element={<ProtectedRoute><UsersPage /></ProtectedRoute>} />
       <Route path="/" element={<DefaultRedirect />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

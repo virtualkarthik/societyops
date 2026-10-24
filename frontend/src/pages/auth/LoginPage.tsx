@@ -19,7 +19,7 @@ export function LoginPage() {
     try {
       const token = await login(email, password);
       setToken(token);
-      navigate("/dashboard");
+      navigate("/"); // DefaultRedirect picks the landing page for this role
     } catch {
       toast.error("Invalid credentials");
     } finally {
