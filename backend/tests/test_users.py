@@ -142,3 +142,20 @@ async def test_me_includes_society_name(client, async_db):
     # Several societies in this test DB -> the public endpoint reveals nothing
     resp = await client.get("/api/v1/auth/branding")
     assert resp.status_code == 200 and resp.json() == {"society_name": None}
+
+
+def test_manifest_short_name():
+    from app.api.v1.auth import _short_name
+    assert _short_name("Opera Apartments") == "Opera Apts"
+    assert _short_name("Sunrise Apartments") == "Sunrise Apts"
+    assert _short_name("Prestige Lakeside Habitat") == "Prestige"
+    assert _short_name("Opera") == "Opera"
+
+
+@pytest.mark.asyncio
+async def test_manifest_served(client):
+    resp = await client.get("/api/v1/auth/manifest.webmanifest")
+    assert resp.status_code == 200
+    assert resp.headers["content-type"].startswith("application/manifest+json")
+    body = resp.json()
+    assert body["start_url"] == "/" and len(body["icons"]) == 2

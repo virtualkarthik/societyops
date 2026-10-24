@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException, status
+from fastapi.responses import JSONResponse
 from sqlalchemy import func, select
 from app.core.deps import CurrentUser, DB
 from app.core.identity import is_email, normalize_phone
@@ -39,12 +40,48 @@ async def me(current_user: CurrentUser, db: DB):
     return MeOut.model_validate(current_user).model_copy(update={"society_name": society.name if society else None})
 
 
+async def _instance_society_name(db: DB) -> str | None:
+    """Each production instance serves one society; with several (e.g. a shared
+    demo) the name is not revealed publicly."""
+    names = (await db.scalars(select(Society.name).limit(2))).all()
+    return names[0] if len(names) == 1 else None
+
+
+def _short_name(name: str) -> str:
+    """Home-screen labels truncate around 12 characters."""
+    if len(name) <= 12:
+        return name
+    short = name.replace("Apartments", "Apts").replace("Apartment", "Apt")
+    return short if len(short) <= 12 else name.split()[0]
+
+
 @router.get("/branding", response_model=BrandingOut)
 async def branding(db: DB):
-    """Public: the society name for the login screen. Each production instance
-    serves one society; with several (e.g. a shared demo) nothing is revealed."""
-    names = (await db.scalars(select(Society.name).limit(2))).all()
-    return BrandingOut(society_name=names[0] if len(names) == 1 else None)
+    """Public: the society name for the login screen."""
+    return BrandingOut(society_name=await _instance_society_name(db))
+
+
+@router.get("/manifest.webmanifest")
+async def web_manifest(db: DB):
+    """PWA manifest, named after the society so the installed app shows its name."""
+    name = await _instance_society_name(db)
+    manifest = {
+        "name": f"{name} · SocietyOps" if name else "SocietyOps",
+        "short_name": _short_name(name) if name else "SocietyOps",
+        "description": "Society Maintenance & Operations — facility and compliance tracker",
+        "theme_color": "#115e59",
+        "background_color": "#fafaf9",
+        "display": "standalone",
+        "orientation": "any",
+        "start_url": "/",
+        "scope": "/",
+        "icons": [
+            {"src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+            {"src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"},
+        ],
+    }
+    return JSONResponse(manifest, media_type="application/manifest+json",
+                        headers={"Cache-Control": "public, max-age=3600"})
 
 
 @router.post("/change-password", status_code=status.HTTP_204_NO_CONTENT)

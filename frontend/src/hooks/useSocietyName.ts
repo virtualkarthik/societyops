@@ -27,6 +27,8 @@ export function useSocietyName(): string | null {
     if (!name) return;
     try { localStorage.setItem(CACHE_KEY, name); } catch { /* storage unavailable */ }
     document.title = `${name} · SocietyOps`;
+    // iOS "Add to Home Screen" uses this as the app's label
+    document.querySelector('meta[name="apple-mobile-web-app-title"]')?.setAttribute("content", name);
   }, [name]);
 
   return name;

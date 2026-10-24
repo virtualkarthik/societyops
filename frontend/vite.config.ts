@@ -8,21 +8,9 @@ export default defineConfig({
     VitePWA({
       registerType: "autoUpdate",
       includeAssets: ["icons/*.png", "icons/*.svg"],
-      manifest: {
-        name: "SocietyOps",
-        short_name: "SocietyOps",
-        description: "Society Maintenance & Operations — facility and compliance tracker",
-        theme_color: "#115e59",
-        background_color: "#fafaf9",
-        display: "standalone",
-        orientation: "any",
-        start_url: "/",
-        scope: "/",
-        icons: [
-          { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any maskable" },
-          { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any maskable" },
-        ],
-      },
+      // The manifest is served by the backend (/api/v1/auth/manifest.webmanifest, linked
+      // from index.html) so the installed app is named after the society on each instance.
+      manifest: false,
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
         runtimeCaching: [
