@@ -22,6 +22,11 @@
     "email": "Email",
     "email_or_phone": "Email or phone",
     "email_or_phone_placeholder": "Email or 10-digit mobile number",
+    "forgot_password": "Forgot password?",
+    "forgot_help": "Enter your email or mobile number. If your account has an email address, we'll send you a temporary password.",
+    "send_temp_password": "Email me a temporary password",
+    "sending": "Sending…",
+    "back_to_login": "Back to login",
     "password": "Password",
     "signing_in": "Signing in…"
   },

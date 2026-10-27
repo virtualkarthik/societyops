@@ -69,15 +69,24 @@ async def test_create_user_then_login_and_change_password(client, async_db):
 
     login = await client.post("/api/v1/auth/login", json={"email": email, "password": temp})
     assert login.status_code == 200
+    assert login.json()["must_change_password"] is True
     headers = {"Authorization": f"Bearer {login.json()['access_token']}"}
 
-    bad = await client.post("/api/v1/auth/change-password", headers=headers,
-                            json={"current_password": "wrong", "new_password": "newpassword1"})
-    assert bad.status_code == 400
-    ok = await client.post("/api/v1/auth/change-password", headers=headers,
-                           json={"current_password": temp, "new_password": "newpassword1"})
+    # Admin-issued password: nothing but /me and change-password until it's changed
+    assert (await client.get("/api/v1/assets", headers=headers)).status_code == 403
+    assert (await client.get("/api/v1/auth/me", headers=headers)).json()["must_change_password"] is True
+    same = await client.post("/api/v1/auth/change-password", headers=headers, json={"new_password": temp})
+    assert same.status_code == 400
+    ok = await client.post("/api/v1/auth/change-password", headers=headers, json={"new_password": "newpassword1"})
     assert ok.status_code == 204
-    assert (await client.post("/api/v1/auth/login", json={"email": email, "password": "newpassword1"})).status_code == 200
+    assert (await client.get("/api/v1/assets", headers=headers)).status_code == 200
+
+    # From now on the current password is required
+    bad = await client.post("/api/v1/auth/change-password", headers=headers,
+                            json={"current_password": "wrong", "new_password": "newpassword2"})
+    assert bad.status_code == 400
+    relogin = await client.post("/api/v1/auth/login", json={"email": email, "password": "newpassword1"})
+    assert relogin.status_code == 200 and relogin.json()["must_change_password"] is False
 
 
 @pytest.mark.asyncio

@@ -3,7 +3,7 @@ import type { User } from "./types";
 
 /** `identifier` is an email or a phone number. */
 export async function login(identifier: string, password: string): Promise<string> {
-  const res = await api.post<{ access_token: string }>("/auth/login", { login: identifier, password });
+  const res = await api.post<{ access_token: string; must_change_password: boolean }>("/auth/login", { login: identifier, password });
   return res.data.access_token;
 }
 
@@ -15,4 +15,9 @@ export async function getMe(): Promise<User> {
 export async function getBranding(): Promise<{ society_name: string | null }> {
   const res = await api.get<{ society_name: string | null }>("/auth/branding");
   return res.data;
+}
+
+export async function forgotPassword(identifier: string): Promise<string> {
+  const res = await api.post<{ detail: string }>("/auth/forgot-password", { login: identifier });
+  return res.data.detail;
 }

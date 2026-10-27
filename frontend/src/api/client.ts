@@ -14,9 +14,14 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (r) => r,
   (err) => {
-    if (err.response?.status === 401) {
+    const isLoginAttempt = err.config?.url === "/auth/login";
+    if (err.response?.status === 401 && !isLoginAttempt) {
       localStorage.removeItem("token");
       window.location.href = "/login";
+    }
+    if (err.response?.status === 403 && err.response.data?.detail === "Password change required") {
+      // e.g. an admin reset this user's password while they were signed in
+      window.dispatchEvent(new Event("password-change-required"));
     }
     return Promise.reject(err);
   }

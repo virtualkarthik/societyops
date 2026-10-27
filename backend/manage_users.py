@@ -80,10 +80,13 @@ def main() -> None:
             password = secrets.token_urlsafe(9)
             session.add(User(society_id=resolve_society_id(session, args.society_id),
                              name=args.name, email=email, phone=phone,
-                             role=UserRole(args.role), password_hash=hash_password(password)))
+                             role=UserRole(args.role), password_hash=hash_password(password),
+                             must_change_password=True))
         elif args.cmd == "reset-password":
             password = secrets.token_urlsafe(9)
-            get_user(session, args.user).password_hash = hash_password(password)
+            user = get_user(session, args.user)
+            user.password_hash = hash_password(password)
+            user.must_change_password = True
         elif args.cmd == "deactivate":
             get_user(session, args.user).is_active = False
         session.commit()

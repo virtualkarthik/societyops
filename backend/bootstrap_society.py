@@ -66,7 +66,7 @@ def main() -> None:
             password = secrets.token_urlsafe(12)
             session.add(User(society_id=society.id, name=args.admin_name,
                              email=args.admin_email, role=UserRole.super_admin,
-                             password_hash=hash_password(password)))
+                             password_hash=hash_password(password), must_change_password=True))
         elif admin.society_id != society.id:
             sys.exit(f"User {args.admin_email} already belongs to another society")
 

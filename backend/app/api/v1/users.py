@@ -50,7 +50,8 @@ async def _ensure_unique(db: DB, email: str | None, phone: str | None, exclude_i
 async def create_user(body: UserCreate, db: DB, current_user: User = SuperAdmin):
     await _ensure_unique(db, body.email, body.phone)
     password = _temporary_password()
-    user = User(society_id=current_user.society_id, password_hash=hash_password(password), **body.model_dump())
+    user = User(society_id=current_user.society_id, password_hash=hash_password(password),
+                must_change_password=True, **body.model_dump())
     db.add(user)
     await db.flush()
     await log_audit(db, current_user.society_id, current_user.id, "CREATE", "User", user.id, after=body.model_dump())
@@ -89,6 +90,9 @@ async def reset_password(user_id: int, db: DB, current_user: User = SuperAdmin):
     user = await _get_or_404(user_id, current_user.society_id, db)
     password = _temporary_password()
     user.password_hash = hash_password(password)
+    user.must_change_password = True
+    user.temp_password_hash = None
+    user.temp_password_expires_at = None
     await log_audit(db, current_user.society_id, current_user.id, "RESET_PASSWORD", "User", user.id)
     await db.commit()
     await db.refresh(user)

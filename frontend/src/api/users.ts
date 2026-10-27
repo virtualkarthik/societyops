@@ -14,7 +14,7 @@ export const updateUser = (id: number, data: Partial<UserInput> & { is_active?: 
   api.patch<User>(`/users/${id}`, data).then((r) => r.data);
 export const resetUserPassword = (id: number) =>
   api.post<UserWithPassword>(`/users/${id}/reset-password`).then((r) => r.data);
-export const changeOwnPassword = (current_password: string, new_password: string) =>
+export const changeOwnPassword = (current_password: string | null, new_password: string) =>
   api.post("/auth/change-password", { current_password, new_password });
 
 // FastAPI returns `detail` as a string for HTTPException and as a list for validation errors.

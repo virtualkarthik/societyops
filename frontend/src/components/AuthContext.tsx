@@ -7,6 +7,7 @@ interface AuthContextValue {
   token: string | null;
   setToken: (token: string) => void;
   logout: () => void;
+  refreshUser: () => void;
   loading: boolean;
 }
 
@@ -15,6 +16,7 @@ export const AuthContext = createContext<AuthContextValue>({
   token: null,
   setToken: () => {},
   logout: () => {},
+  refreshUser: () => {},
   loading: true,
 });
 
@@ -35,6 +37,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   }, []);
 
+  const refreshUser = useCallback(() => {
+    getMe().then(setUser).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener("password-change-required", refreshUser);
+    return () => window.removeEventListener("password-change-required", refreshUser);
+  }, [refreshUser]);
+
   useEffect(() => {
     if (!token) {
       setLoading(false);
@@ -47,7 +58,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [token, logout]);
 
   return (
-    <AuthContext.Provider value={{ user, token, setToken, logout, loading }}>
+    <AuthContext.Provider value={{ user, token, setToken, logout, refreshUser, loading }}>
       {children}
     </AuthContext.Provider>
   );

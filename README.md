@@ -77,6 +77,12 @@ Users log in with their **email or mobile number** (operators often have no emai
 
 Super admins manage users from the **Users** page in the app: add users (a one-time temporary password is shown to share with them), change roles, reset passwords, and deactivate accounts (which blocks login immediately). Every user can change their own password from **Change Password** in the header (or the menu on mobile).
 
+**Forgot password.** "Forgot password?" on the login screen emails a temporary password (valid 30 minutes, at most one email per 5 minutes) to users who have an email address; phone-only users are told to ask an admin. The temporary password works *alongside* the current one, so a stranger requesting a reset can't lock anyone out. The response is identical whether or not the account exists.
+
+**Forced password change.** Anyone signing in with a temporary or admin-issued password (Add User, Reset Password, forgot-password, `manage_users.py`) must set their own password before they can use the app; the API enforces this too (everything except `/auth/me` and `/auth/change-password` returns 403). The Users page marks such accounts "Temp password".
+
+**Email setup.** Sending needs SMTP credentials on the instance. Run `./scripts/set-smtp.sh <target>` in your own terminal: it prompts (password hidden) and writes them to the VM's `.env`. For Gmail use `smtp.gmail.com`, port 587, and an [App Password](https://myaccount.google.com/apppasswords) (needs 2-Step Verification). Until configured, forgot-password requests are logged as errors and no email is sent.
+
 For recovery when nobody can log in (e.g. the only admin lost their password), the same actions are available over SSH:
 
 ```bash

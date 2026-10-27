@@ -15,6 +15,11 @@ class LoginRequest(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
+    must_change_password: bool = False
+
+
+class ForgotPasswordRequest(BaseModel):
+    login: str  # email or phone
 
 
 class UserOut(BaseModel):
@@ -25,6 +30,7 @@ class UserOut(BaseModel):
     phone: str | None
     role: UserRole
     is_active: bool
+    must_change_password: bool = False
 
     model_config = {"from_attributes": True}
 

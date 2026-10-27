@@ -50,5 +50,7 @@ class UserWithPassword(BaseModel):
 
 
 class ChangePasswordRequest(BaseModel):
-    current_password: str
+    # Not required while must_change_password is set: the user has just
+    # authenticated with the temporary password.
+    current_password: Optional[str] = None
     new_password: str = Field(min_length=MIN_PASSWORD_LENGTH, max_length=128)

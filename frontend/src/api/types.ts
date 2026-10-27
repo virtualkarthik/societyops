@@ -8,6 +8,7 @@ export interface User {
   phone: string | null;
   role: UserRole;
   is_active: boolean;
+  must_change_password: boolean;
   society_name?: string | null; // only on /auth/me
 }
 

@@ -83,7 +83,7 @@ function PasswordReveal({ result, heading, onClose }: { result: UserWithPassword
     <Modal title={heading} subtitle={result.user.name} onClose={onClose}>
       <p className="text-sm text-gray-600">
         Share these login details with <span className="font-medium">{result.user.name}</span>.
-        This password is shown <span className="font-semibold">only once</span>; they can change it after logging in.
+        This password is shown <span className="font-semibold">only once</span>; they'll be asked to choose their own password when they log in.
       </p>
       <div className="bg-gray-50 border rounded-lg p-3 text-sm space-y-1 font-mono break-all select-all">
         {result.user.phone && <div><span className="text-gray-500">Phone: </span>{formatPhone(result.user.phone)}</div>}
@@ -310,6 +310,12 @@ export function UsersPage() {
                   {u.id === me?.id && <span className="text-xs text-gray-400">(you)</span>}
                   <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${ROLE_COLORS[u.role]}`}>{ROLE_LABELS[u.role]}</span>
                   {!u.is_active && <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-red-100 text-red-700">Inactive</span>}
+                  {u.is_active && u.must_change_password && (
+                    <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 ring-1 ring-amber-200"
+                      title="Hasn't set their own password yet">
+                      Temp password
+                    </span>
+                  )}
                 </div>
                 <p className="text-sm text-gray-500 truncate">{contactLine(u)}</p>
               </div>
